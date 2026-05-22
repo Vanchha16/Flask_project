@@ -40,7 +40,7 @@ def cart():
 
 @app.get("/payment")
 def payment():
-    return render_template("front/payment.html")
+    return render_template("front/payment.html", product=product)
 
 @app.get("/shop")
 def shop():
