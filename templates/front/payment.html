@@ -1,0 +1,155 @@
+{% extends "front/layout/master.html" %}
+{% block title %}Payment — VC Shop{% endblock %}
+{% block content %}
+<div class="container page-shell">
+    <div style="display:flex;gap:8px;font-size:13px;color:#888;margin-bottom:36px">
+        <a href="/" style="color:var(--accent)">Home</a><span>/</span>
+        <a href="/cart" style="color:var(--accent)">Cart</a><span>/</span>
+        <span style="color:#555">Payment</span>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 400px;gap:56px;align-items:start">
+        <!-- Left — QR / Status -->
+        <div>
+            <h1 id="pay-title" style="font-family:var(--heading);font-size:32px;font-weight:700;color:#111;letter-spacing:-.02em;margin-bottom:8px">Scan to Pay</h1>
+            <p id="pay-sub" style="font-size:14.5px;color:#888;margin-bottom:40px">Scan the QR code with your banking or payment app</p>
+
+            <!-- QR Step -->
+            <div id="step-qr" style="display:flex;flex-direction:column;align-items:center">
+                <div style="background:#fff;border:1.5px solid #eee;border-radius:var(--radius);padding:32px;display:flex;flex-direction:column;align-items:center;gap:24px;max-width:340px;width:100%;box-shadow:0 4px 24px rgba(0,0,0,.06)">
+                    <div style="padding:12px;background:var(--accent-light);border-radius:12px">
+                        <img id="qr-canvas" src="{{ url_for('static', filename='img/qr.png') }}" width="180" height="180" alt="QR Code">
+                    </div>
+                    <div style="text-align:center">
+                        <div id="pay-amount" style="font-family:var(--heading);font-size:28px;font-weight:700;color:#111;margin-bottom:4px">$0.00</div>
+                        <div style="font-size:13px;color:#999">Amount due</div>
+                    </div>
+                    <div id="timer-display" style="display:flex;align-items:center;gap:6px;font-size:13px;color:#888">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                        Expires in <span id="timer-text">5:00</span>
+                    </div>
+                </div>
+
+                <div style="margin-top:28px;display:flex;gap:14px;align-items:center">
+                    <div style="padding:6px 14px;border-radius:6px;border:1px solid #e8e8e8;font-size:12px;color:#888;font-weight:500">Apple Pay</div>
+                    <div style="padding:6px 14px;border-radius:6px;border:1px solid #e8e8e8;font-size:12px;color:#888;font-weight:500">Google Pay</div>
+                    <div style="padding:6px 14px;border-radius:6px;border:1px solid #e8e8e8;font-size:12px;color:#888;font-weight:500">PayPal</div>
+                </div>
+
+                <button onclick="simulatePay()" class="btn btn-accent" style="margin-top:28px">Simulate Payment</button>
+            </div>
+
+            <!-- Processing Step -->
+            <div id="step-processing" style="display:none;flex-direction:column;align-items:center;padding:60px 0">
+                <div id="spinner" style="width:56px;height:56px;border:3px solid #eee;border-top-color:var(--accent);border-radius:50%"></div>
+                <p style="margin-top:20px;font-size:15px;color:#888">Processing payment...</p>
+            </div>
+
+            <!-- Success Step -->
+            <div id="step-success" style="display:none;flex-direction:column;align-items:center;padding:40px 0">
+                <div style="width:72px;height:72px;border-radius:50%;background:#E8F8F1;display:grid;place-items:center;margin-bottom:20px">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0D9668" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
+                </div>
+                <h2 style="font-family:var(--heading);font-size:24px;font-weight:700;color:#111;margin-bottom:8px">Thank you!</h2>
+                <p style="font-size:14.5px;color:#888;margin-bottom:6px;text-align:center;max-width:340px">Your payment of <strong id="success-amount" style="color:#111">$0.00</strong> was successful.</p>
+                <p id="order-id" style="font-size:13px;color:#bbb;margin-bottom:28px"></p>
+                <div style="display:flex;gap:12px">
+                    <a href="/" class="btn btn-accent">Back to Home</a>
+                    <a href="/#products" class="btn btn-outline">Continue Shopping</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right — Order Summary -->
+        <div style="background:var(--surface);border-radius:var(--radius);padding:28px;position:sticky;top:88px">
+            <h3 style="font-family:var(--heading);font-size:18px;font-weight:700;color:#111;margin-bottom:20px">Order Summary</h3>
+            <div id="pay-items"></div>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-top:18px">
+                <div style="display:flex;justify-content:space-between;font-size:13.5px;color:#666"><span>Subtotal</span><span id="pay-sub-total">$0</span></div>
+                <div style="display:flex;justify-content:space-between;font-size:13.5px;color:#666"><span>Shipping</span><span id="pay-shipping">Free</span></div>
+                <div style="border-top:1px solid #e0e0e0;padding-top:12px;display:flex;justify-content:space-between;font-family:var(--heading);font-weight:700;font-size:16px;color:#111"><span>Total</span><span id="pay-total">$0</span></div>
+            </div>
+            <div style="margin-top:22px;display:flex;flex-direction:column;gap:8px;font-size:12px;color:#aaa">
+                <div style="display:flex;align-items:center;gap:8px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Secure 256-bit encryption</div>
+                <div style="display:flex;align-items:center;gap:8px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg> Money-back guarantee</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+@keyframes spin{to{transform:rotate(360deg)}}
+#spinner{animation:spin .8s linear infinite}
+</style>
+<script>
+// Load cart & render
+const cart=JSON.parse(localStorage.getItem('cart')||'[]');
+let subtotal=0;
+const itemsEl=document.getElementById('pay-items');
+if(cart.length===0){
+    itemsEl.innerHTML='<p style="color:#aaa;font-size:13px;text-align:center;padding:20px">No items</p>';
+} else {
+    let html='';
+    cart.forEach(item=>{
+        const t=item.price*item.qty;subtotal+=t;
+        html+=`<div style="display:flex;gap:12px;padding:12px 0;border-bottom:1px solid rgba(0,0,0,.05);align-items:center">
+            <img src="${item.image}" style="width:48px;height:48px;object-fit:contain;border-radius:6px;background:#f5f3f0;padding:4px">
+            <div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${item.title.substring(0,25)}</div><div style="font-size:11.5px;color:#999">Qty: ${item.qty}</div></div>
+            <div style="font-size:13px;font-weight:600;color:#111">$${t.toFixed(2)}</div>
+        </div>`;
+    });
+    itemsEl.innerHTML=html;
+}
+const shipping=subtotal>50?0:5.99;
+const total=subtotal+shipping;
+document.getElementById('pay-sub-total').textContent='$'+subtotal.toFixed(2);
+document.getElementById('pay-shipping').textContent=shipping?'$'+shipping.toFixed(2):'Free';
+document.getElementById('pay-total').textContent='$'+total.toFixed(2);
+document.getElementById('pay-amount').textContent='$'+total.toFixed(2);
+document.getElementById('success-amount').textContent='$'+total.toFixed(2);
+document.getElementById('order-id').textContent='Order #VC-'+Math.floor(Math.random()*90000+10000);
+
+// QR Code generator
+(function(){
+    const c=document.getElementById('qr-canvas');
+    const ctx=c.getContext('2d');
+    const m=21,s=c.width/m;
+    ctx.fillStyle='#fff';ctx.fillRect(0,0,c.width,c.height);
+    ctx.fillStyle='#111';
+    const fp=[[0,0],[14,0],[0,14]];
+    fp.forEach(([fx,fy])=>{for(let y=0;y<7;y++)for(let x=0;x<7;x++){const o=x===0||x===6||y===0||y===6;const i=x>=2&&x<=4&&y>=2&&y<=4;if(o||i)ctx.fillRect((fx+x)*s,(fy+y)*s,s-.5,s-.5);}});
+    let seed=Math.round(total*100);
+    function next(){seed=(seed*1103515245+12345)&0x7fffffff;return seed;}
+    for(let y=0;y<m;y++)for(let x=0;x<m;x++){if(fp.some(([fx,fy])=>x>=fx&&x<fx+7&&y>=fy&&y<fy+7))continue;if(next()%3===0)ctx.fillRect(x*s,y*s,s-.5,s-.5);}
+})();
+
+// Timer
+let timer=300;
+const timerEl=document.getElementById('timer-text');
+const timerWrap=document.getElementById('timer-display');
+const tid=setInterval(()=>{
+    timer--;if(timer<=0){clearInterval(tid);timerEl.textContent='0:00';return;}
+    const m=Math.floor(timer/60),s=timer%60;
+    timerEl.textContent=m+':'+String(s).padStart(2,'0');
+    if(timer<60)timerWrap.style.color='var(--accent)';
+},1000);
+
+// Simulate
+function simulatePay(){
+    document.getElementById('step-qr').style.display='none';
+    document.getElementById('step-processing').style.display='flex';
+    document.getElementById('pay-title').textContent='Processing...';
+    document.getElementById('pay-sub').textContent='Verifying your payment...';
+    clearInterval(tid);
+    setTimeout(()=>{
+        document.getElementById('step-processing').style.display='none';
+        document.getElementById('step-success').style.display='flex';
+        document.getElementById('pay-title').textContent='Payment Complete';
+        document.getElementById('pay-sub').textContent='Your order has been confirmed';
+        localStorage.removeItem('cart');
+    },2200);
+}
+</script>
+{% endblock %}

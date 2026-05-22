@@ -1,0 +1,36 @@
+{% extends "front/layout/master.html" %}
+{% block title %}Cart — VC Shop{% endblock %}
+{% block content %}
+<div class="container page-shell">
+    <h1 class="page-title">Your Cart</h1>
+    <p class="page-sub">3 items</p>
+
+    <div class="cart-layout">
+        <div>
+            {% for item in product[:3] %}
+            <div class="cart-item">
+                <div class="cart-item-img"><img src="{{ item.image}}" alt=""></div>
+                <div class="cart-item-info"><h3>{{ item.title }}</h3><span>{{ item.category }}</span></div>
+                <div class="qty-box"><button>−</button><span>1</span><button>+</button></div>
+                <div class="cart-item-total">{{ item.price }}</div>
+                <button class="remove-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+            </div>
+            {% endfor %}
+
+        </div>
+
+        <div class="cart-summary">
+            <h3>Order Summary</h3>
+            <div class="summary-row"><span>Subtotal</span><span>$1,613.95</span></div>
+            <div class="summary-row"><span>Shipping</span><span>Free</span></div>
+            <div class="summary-total"><span>Total</span><span>$1,613.95</span></div>
+            <a href="{{ url_for('payment') }}" class="btn btn-accent btn-full" style="margin-top:24px">Checkout</a>
+            <a href="{{ url_for('shop') }}" style="display:block;text-align:center;margin-top:10px;font-size:13px;color:#666">Continue Shopping</a>
+            <div style="margin-top:18px;display:flex;flex-direction:column;gap:6px;font-size:12px;color:#aaa">
+                <div>🔒 Secure 256-bit encryption</div>
+                <div>↩️ Money-back guarantee</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends "front/layout/master.html" %}
+{% block title %}{{ title }} — VC Shop{% endblock %}
+{% block content %}
+<div class="container page-shell">
+    <div style="display:flex;gap:8px;font-size:13px;color:#888;margin-bottom:36px">
+        <a href="/" style="color:var(--accent)">Home</a><span>/</span>
+        <a href="/#products" style="color:var(--accent)">Shop</a><span>/</span>
+        <span style="color:#555">{{ title }}</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start">
+        <div style="border-radius:var(--radius);overflow:hidden;background:#f5f3f0;padding:40px;display:grid;place-items:center;aspect-ratio:1">
+            <img src="{{ image }}" alt="{{ title }}" style="max-height:360px;object-fit:contain">
+        </div>
+        <div style="padding-top:16px">
+            <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--accent);margin-bottom:10px">{{ category }}</div>
+            <h1 style="font-family:var(--heading);font-size:34px;font-weight:700;color:#111;letter-spacing:-.02em;margin-bottom:14px">{{ title }}</h1>
+            <div style="font-family:var(--heading);font-size:30px;font-weight:700;color:#111;margin-bottom:20px">${{ price }}</div>
+            <p style="font-size:15px;color:#666;line-height:1.7;margin-bottom:28px;max-width:460px">{{ description }}</p>
+            <div style="margin-bottom:24px">
+                <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#888;margin-bottom:10px">Quantity</div>
+                <div class="qty-box" style="width:fit-content"><button onclick="changeQty(-1)">−</button><span id="detail-qty">1</span><button onclick="changeQty(1)">+</button></div>
+            </div>
+            <div style="display:flex;gap:12px">
+                <button class="btn btn-accent" style="flex:1;padding:14px 24px;font-size:15px" onclick="addDetailToCart()">Add to Cart</button>
+                <button class="btn btn-outline" style="width:48px;height:48px;padding:0;display:grid;place-items:center"><i class="fa-regular fa-heart" style="font-size:18px;color:#888"></i></button>
+            </div>
+            <div style="margin-top:32px;display:flex;flex-direction:column;gap:12px;font-size:13px;color:#888">
+                <div><i class="fa-solid fa-truck" style="width:20px"></i> Free shipping on orders over $50</div>
+                <div><i class="fa-solid fa-rotate" style="width:20px"></i> 30-day hassle-free returns</div>
+                <div><i class="fa-solid fa-shield-halved" style="width:20px"></i> Secure checkout guaranteed</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+let qty=1;
+function changeQty(d){qty=Math.max(1,qty+d);document.getElementById('detail-qty').textContent=qty;}
+function addDetailToCart(){
+    const cart=JSON.parse(localStorage.getItem('cart')||'[]');
+    const id='{{ pro_id }}';
+    const existing=cart.find(i=>i.id===id);
+    if(existing){existing.qty+=qty;}
+    else{cart.push({id,title:'{{ title }}',price:{{ price }},image:'{{ image }}',category:'{{ category }}',qty});}
+    localStorage.setItem('cart',JSON.stringify(cart));
+    document.getElementById('cart-count-badge').textContent=cart.reduce((s,i)=>s+i.qty,0);
+    const btn=event.target;btn.textContent='✓ Added!';btn.style.background='#2a9d5c';
+    setTimeout(()=>{btn.textContent='Add to Cart';btn.style.background='';},1500);
+}
+</script>
+{% endblock %}

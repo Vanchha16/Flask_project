@@ -1,0 +1,72 @@
+{% extends "front/layout/master.html" %}
+{% block title %}Shop — VC Shop{% endblock %}
+{% block content %}
+
+<div class="container page-shell">
+    <div style="margin-bottom:36px">
+        <div style="display:flex;gap:8px;font-size:13px;color:#888;margin-bottom:18px">
+            <a href="/" style="color:var(--accent)">Home</a><span>/</span>
+            <span style="color:#555">Shop</span>
+        </div>
+        <h1 class="page-title">Shop</h1>
+        <p class="page-sub" style="margin-bottom:0">{{ product|length }} products</p>
+    </div>
+
+    <!-- Filters (JS) -->
+    <div class="filter-bar">
+        <div class="filter-pills">
+            <button class="filter-btn active" data-category="all">All</button>
+            {% set cats = [] %}
+            {% for item in product %}
+                {% if item.category not in cats %}
+                    {% if cats.append(item.category) %}{% endif %}
+                    <button class="filter-btn" data-category="{{ item.category }}">{{ item.category|title }}</button>
+                {% endif %}
+            {% endfor %}
+        </div>
+        <div style="font-size:13px;color:#999">
+            <i class="fa-solid fa-grid" style="margin-right:6px"></i> <span id="visible-count">{{ product|length }}</span> items
+        </div>
+    </div>
+
+    <!-- Product Grid -->
+    <div class="product-grid">
+        {% for item in product %}
+        <a href="/detail?pro_id={{ item.id }}&title={{ item.title|urlencode }}&image={{ item.image|urlencode }}&price={{ item.price }}&category={{ item.category|urlencode }}&description={{ item.description|urlencode }}"
+           class="product-link" data-category="{{ item.category }}">
+            <article class="product-card">
+                <div class="product-card-img"><img src="{{ item.image }}" alt="{{ item.title }}"></div>
+                <div class="product-card-body">
+                    <div class="product-cat">{{ item.category }}</div>
+                    <div class="product-name">{{ item.title }}</div>
+                    <div class="product-foot">
+                        <span class="product-price">${{ '%.2f'|format(item.price) }}</span>
+                        <button class="btn btn-accent btn-sm" onclick="event.preventDefault();event.stopPropagation();">View Details</button>
+                    </div>
+                </div>
+            </article>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', function () {
+        const category = this.dataset.category;
+
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+
+        let count = 0;
+        document.querySelectorAll('.product-link').forEach(card => {
+            const match = category === 'all' || card.dataset.category === category;
+            card.style.display = match ? '' : 'none';
+            if (match) count++;
+        });
+
+        document.getElementById('visible-count').textContent = count;
+    });
+});
+</script>
+{% endblock %}
