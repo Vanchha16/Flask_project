@@ -5,3 +5,6 @@ instance/
 venv/
 .idea/
 migrations/
+*.sqlite3
+package-lock.json
+package.json

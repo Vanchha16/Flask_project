@@ -1,9 +1,11 @@
 import requests
 from flask import Flask, render_template, request
 from product import product
+from blueprints.admin import admin_bp
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 app = Flask(__name__)
+app.register_blueprint(admin_bp)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///mydb.sqlite3"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 

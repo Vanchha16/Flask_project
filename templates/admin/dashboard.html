@@ -1,0 +1,206 @@
+{% extends "admin/base.html" %}
+
+{% block title %}VC Shop — Admin Dashboard{% endblock %}
+
+{% block body %}
+<div class="dashboard">
+
+  <!-- ══ SIDEBAR ══ -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="mark">VC</div>
+      <span>VC Shop</span>
+    </div>
+    <nav class="sidebar-nav" id="sidebar-nav"></nav>
+  </aside>
+
+  <!-- ══ MAIN ══ -->
+  <div class="main">
+
+    <!-- ── Topbar ── -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <button id="sidebar-toggle"></button>
+        <div class="breadcrumb">Dashboard / <strong id="breadcrumb-page">Overview</strong></div>
+      </div>
+
+      <div class="topbar-right">
+
+        <!-- Global Search -->
+        <div class="relative" id="search-wrap">
+          <div class="topbar-search" id="topbar-search-wrap">
+            <input type="text" id="global-search"
+                   placeholder="Search… (press / to focus)"
+                   autocomplete="off" style="width:220px">
+          </div>
+          <div id="search-dropdown"
+               class="hidden absolute left-0 mt-1 rounded-xl shadow-xl border overflow-hidden z-50"
+               style="top:100%;min-width:340px;background:var(--card-bg);border-color:var(--border);max-height:420px;overflow-y:auto">
+          </div>
+        </div>
+
+        <!-- Theme Toggle -->
+        <button id="theme-toggle" title="Toggle theme"></button>
+
+        <!-- Notification Bell -->
+        <div class="relative" id="notif-wrap">
+          <button id="topbar-notif-btn" class="topbar-btn relative" onclick="toggleNotifDropdown()">
+            <span class="notif-dot"></span>
+          </button>
+
+          <div id="notif-dropdown"
+               class="hidden absolute right-0 mt-2 w-80 rounded-xl shadow-xl border z-50 overflow-hidden"
+               style="top:100%;background:var(--card-bg);border-color:var(--border);">
+
+            <div class="flex items-center justify-between px-4 py-3"
+                 style="border-bottom:1px solid var(--border)">
+              <span class="font-semibold text-sm"
+                    style="font-family:var(--heading);color:var(--text)">Notifications</span>
+              <div class="flex items-center gap-2">
+                <span class="text-xs px-2 py-0.5 rounded-full font-semibold"
+                      style="background:var(--accent);color:#fff">3 new</span>
+                <button class="text-xs font-medium"
+                        style="color:var(--accent)" onclick="markAllRead()">Mark all read</button>
+              </div>
+            </div>
+
+            <div class="overflow-y-auto" style="max-height:320px" id="notif-list"></div>
+
+            <div class="px-4 py-3 text-center" style="border-top:1px solid var(--border)">
+              <button class="text-xs font-semibold" style="color:var(--accent)"
+                      onclick="toggleNotifDropdown()">View all notifications →</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- User Profile -->
+        <div class="relative" id="profile-wrap">
+          <button id="profile-btn" onclick="toggleProfileDropdown()"
+                  class="flex items-center gap-2 rounded-xl px-2 py-1 transition-all duration-150"
+                  style="border:1px solid transparent"
+                  onmouseenter="this.style.borderColor='var(--border)';this.style.background='var(--hover-bg)'"
+                  onmouseleave="this.style.borderColor='transparent';this.style.background='transparent'">
+            <div class="topbar-avatar flex-shrink-0">A</div>
+            <div class="text-left hidden sm:block">
+              <div class="text-xs font-semibold leading-tight" style="color:var(--text)">Admin User</div>
+              <div class="text-xs leading-tight" style="color:var(--text-muted)">admin@vcshop.com</div>
+            </div>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                 style="color:var(--text-muted)" id="profile-chevron">
+              <path d="M6 9l6 6 6-6"/>
+            </svg>
+          </button>
+
+          <div id="profile-dropdown"
+               class="hidden absolute right-0 mt-2 w-56 rounded-xl shadow-xl border z-50 overflow-hidden"
+               style="top:100%;background:var(--card-bg);border-color:var(--border);">
+
+            <div class="px-4 py-3" style="border-bottom:1px solid var(--border)">
+              <div class="flex items-center gap-3">
+                <div class="topbar-avatar" style="width:38px;height:38px;font-size:14px;flex-shrink:0">A</div>
+                <div>
+                  <div class="text-sm font-semibold" style="color:var(--text)">Admin User</div>
+                  <div class="text-xs" style="color:var(--text-muted)">admin@vcshop.com</div>
+                  <span class="text-xs px-1.5 py-0.5 rounded font-semibold mt-0.5 inline-block"
+                        style="background:var(--accent-light);color:var(--accent)">Super Admin</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="py-1.5">
+              <button onclick="profileAction('profile')"
+                      class="w-full flex items-center gap-3 px-4 py-2 text-sm text-left"
+                      style="color:var(--text)"
+                      onmouseenter="this.style.background='var(--hover-bg)'"
+                      onmouseleave="this.style.background='transparent'">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+                My Profile
+              </button>
+
+              <button onclick="profileAction('settings')"
+                      class="w-full flex items-center gap-3 px-4 py-2 text-sm text-left"
+                      style="color:var(--text)"
+                      onmouseenter="this.style.background='var(--hover-bg)'"
+                      onmouseleave="this.style.background='transparent'">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="3"/>
+                  <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
+                </svg>
+                Settings
+              </button>
+
+              <button onclick="profileAction('billing')"
+                      class="w-full flex items-center gap-3 px-4 py-2 text-sm text-left"
+                      style="color:var(--text)"
+                      onmouseenter="this.style.background='var(--hover-bg)'"
+                      onmouseleave="this.style.background='transparent'">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="1" y="4" width="22" height="16" rx="2"/>
+                  <line x1="1" y1="10" x2="23" y2="10"/>
+                </svg>
+                Billing
+              </button>
+
+              <button onclick="profileAction('help')"
+                      class="w-full flex items-center gap-3 px-4 py-2 text-sm text-left"
+                      style="color:var(--text)"
+                      onmouseenter="this.style.background='var(--hover-bg)'"
+                      onmouseleave="this.style.background='transparent'">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/>
+                  <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+                Help &amp; Support
+              </button>
+            </div>
+
+            <div class="py-1.5" style="border-top:1px solid var(--border)">
+              <button onclick="profileAction('logout')"
+                      class="w-full flex items-center gap-3 px-4 py-2 text-sm text-left font-medium"
+                      style="color:#E8553D"
+                      onmouseenter="this.style.background='#FDECEB'"
+                      onmouseleave="this.style.background='transparent'">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+                  <polyline points="16 17 21 12 16 7"/>
+                  <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+                Log Out
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /topbar-right -->
+    </div><!-- /topbar -->
+
+    <!-- ── Page Content (rendered by JS) ── -->
+    <div class="page-content" id="page-content"></div>
+
+  </div><!-- /main -->
+</div><!-- /dashboard -->
+
+<!-- ══ Modal ══ -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="modal-title"></h2>
+      <button class="modal-close" id="modal-close-btn"></button>
+    </div>
+    <div class="modal-content" id="modal-body"></div>
+  </div>
+</div>
+
+<!-- ══ Toast Container ══ -->
+<div id="toast-container"></div>
+{% endblock %}
