@@ -1,43 +1,19 @@
+import os
 import requests
 from flask import Flask, render_template, request
 from product import product
-from blueprints.admin import admin_bp 
-from flask_sqlalchemy import SQLAlchemy
+from blueprints.admin import admin_bp
 from flask_migrate import Migrate
+from models import db, Product, User, Category, Cart  # ✅ import everything from models
 
 app = Flask(__name__)
 app.register_blueprint(admin_bp)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///mydb.sqlite3"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-
-db = SQLAlchemy(app)
+app.config["SECRET_KEY"] = "vc-shop-secret-key"
+app.config["UPLOAD_FOLDER"] = os.path.join(app.root_path, "static", "uploads")
+db.init_app(app)  # ✅ only this, no SQLAlchemy(app)
 migrate = Migrate(app, db)
-
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True,)
-    username = db.Column(db.String(80), nullable=False)
-    email = db.Column(db.String(120), nullable=False, unique=True)
-    password = db.Column(db.String(200), nullable=False)
-
-class Category(db.Model):
-    cat_id = db.Column(db.Integer, primary_key=True)
-    category_name = db.Column(db.String(80), nullable=False)
-    description = db.Column(db.Text, nullable=False)
-
-class Product(db.Model):
-    pro_id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(80), nullable=False)
-    price = db.Column(db.Float, nullable=False)
-    image = db.Column(db.String(200), nullable=False)
-    description = db.Column(db.Text, nullable=False)
-    cat_id = db.Column(db.Integer, db.ForeignKey('category.cat_id'), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-
-class Cart(db.Model):
-    cart_id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    pro_id = db.Column(db.Integer, db.ForeignKey('product.pro_id'), nullable=False)
-    quantity = db.Column(db.Integer, nullable=False)
 
 
 @app.get("/")

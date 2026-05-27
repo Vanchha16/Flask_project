@@ -1,0 +1,211 @@
+{% extends "admin/layout/master.html" %}
+{% block title %}{{ product.title }} — VC Shop Admin{% endblock %}
+{% block page_title %}Product Detail{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-text">
+    <h1>Product Detail</h1>
+    <p>Viewing: <strong>{{ product.title }}</strong></p>
+  </div>
+  <div style="display:flex;gap:10px">
+    <a href="{{ url_for('admin.product_edit', pro_id=product.pro_id) }}"
+       class="btn-primary flex items-center gap-2">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+        <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+      </svg>
+      Edit
+    </a>
+    <a href="{{ url_for('admin.products') }}"
+       class="btn-secondary flex items-center gap-2">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"/>
+        <polyline points="12 19 5 12 12 5"/>
+      </svg>
+      Back
+    </a>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:340px 1fr;gap:24px;align-items:start">
+
+  <!-- ── Left: Image card ── -->
+  <div class="table-card" style="padding:0;overflow:hidden">
+    {% if product.image %}
+    <img src="{{ url_for('static', filename='uploads/' + product.image) }}"
+         alt="{{ product.title }}"
+         style="width:100%;height:300px;object-fit:cover"
+         onerror="this.style.display='none';document.getElementById('img-placeholder').style.display='flex'">
+    <div id="img-placeholder"
+         style="display:none;height:300px;align-items:center;justify-content:center;
+                background:var(--hover-bg2)">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+           style="color:var(--text-muted);opacity:.4">
+        <rect x="3" y="3" width="18" height="18" rx="2"/>
+        <circle cx="8.5" cy="8.5" r="1.5"/>
+        <polyline points="21 15 16 10 5 21"/>
+      </svg>
+    </div>
+    {% else %}
+    <div style="height:300px;display:flex;align-items:center;justify-content:center;
+                background:var(--hover-bg2)">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+           style="color:var(--text-muted);opacity:.4">
+        <rect x="3" y="3" width="18" height="18" rx="2"/>
+        <circle cx="8.5" cy="8.5" r="1.5"/>
+        <polyline points="21 15 16 10 5 21"/>
+      </svg>
+    </div>
+    {% endif %}
+
+    <!-- Image footer info -->
+    <div style="padding:16px 20px;border-top:1px solid var(--border)">
+      <div style="font-size:11px;color:var(--text-muted);font-weight:600;
+                  text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">
+        Image File
+      </div>
+      <div style="font-size:12.5px;color:var(--text);word-break:break-all">
+        {{ product.image or '(none)' }}
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Right: Details card ── -->
+  <div class="table-card" style="padding:28px">
+
+    <!-- Product ID badge -->
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
+      <span style="font-size:11.5px;font-weight:700;padding:4px 12px;border-radius:100px;
+                   background:var(--accent-light);color:var(--accent)">
+        ID #{{ product.pro_id }}
+      </span>
+      {% if product.category %}
+      <span style="font-size:11.5px;font-weight:600;padding:4px 12px;border-radius:100px;
+                   background:#D1FAE5;color:#065F46">
+        {{ product.category.category_name }}
+      </span>
+      {% endif %}
+    </div>
+
+    <!-- Title -->
+    <h2 style="font-family:var(--heading);font-size:22px;font-weight:700;color:var(--text);
+               line-height:1.3;margin-bottom:6px">
+      {{ product.title }}
+    </h2>
+
+    <!-- Price -->
+    <div style="font-size:28px;font-weight:800;color:var(--accent);
+                letter-spacing:-.5px;margin-bottom:24px">
+      ${{ "%.2f" | format(product.price) }}
+    </div>
+
+    <div style="height:1px;background:var(--border);margin-bottom:24px"></div>
+
+    <!-- Details grid -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:24px">
+
+      <div style="padding:14px 16px;border-radius:10px;background:var(--hover-bg)">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+                    color:var(--text-muted);margin-bottom:4px">Category</div>
+        <div style="font-size:13.5px;font-weight:600;color:var(--text)">
+          {{ product.category.category_name if product.category else '—' }}
+        </div>
+      </div>
+
+      <div style="padding:14px 16px;border-radius:10px;background:var(--hover-bg)">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+                    color:var(--text-muted);margin-bottom:4px">Price</div>
+        <div style="font-size:13.5px;font-weight:700;color:var(--text)">
+          ${{ "%.2f" | format(product.price) }}
+        </div>
+      </div>
+
+      <div style="padding:14px 16px;border-radius:10px;background:var(--hover-bg)">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+                    color:var(--text-muted);margin-bottom:4px">Category ID</div>
+        <div style="font-size:13.5px;font-weight:600;color:var(--text)">
+          {{ product.cat_id or '—' }}
+        </div>
+      </div>
+
+      <div style="padding:14px 16px;border-radius:10px;background:var(--hover-bg)">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+                    color:var(--text-muted);margin-bottom:4px">Added By (User ID)</div>
+        <div style="font-size:13.5px;font-weight:600;color:var(--text)">
+          {{ product.user_id or '—' }}
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Description -->
+    <div>
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+                  color:var(--text-muted);margin-bottom:10px">Description</div>
+      {% if product.description %}
+      <p style="font-size:13.5px;color:var(--text);line-height:1.7">
+        {{ product.description }}
+      </p>
+      {% else %}
+      <p style="font-size:13px;color:var(--text-muted);font-style:italic">No description.</p>
+      {% endif %}
+    </div>
+
+    <!-- Action buttons -->
+    <div style="display:flex;align-items:center;gap:12px;margin-top:28px;
+                padding-top:20px;border-top:1px solid var(--border)">
+
+      <a href="{{ url_for('admin.product_edit', pro_id=product.pro_id) }}"
+         class="btn-primary" style="display:inline-flex;align-items:center;gap:8px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+          <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+        </svg>
+        Edit Product
+      </a>
+
+      <a href="{{ url_for('admin.products') }}"
+         class="btn-secondary">All Products</a>
+
+      <!-- Delete -->
+      <form method="POST"
+            action="{{ url_for('admin.product_delete', pro_id=product.pro_id) }}"
+            style="margin-left:auto"
+            onsubmit="return confirmDeleteProduct(event, '{{ product.title | e }}', this)">
+        <button type="submit"
+                style="display:inline-flex;align-items:center;gap:6px;
+                       padding:8px 14px;border-radius:8px;border:1.5px solid #FECACA;
+                       background:transparent;color:#E8553D;font-size:13px;
+                       font-weight:600;cursor:pointer;transition:background .15s"
+                onmouseenter="this.style.background='#FDECEB'"
+                onmouseleave="this.style.background='transparent'">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round"
+               stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+          </svg>
+          Delete
+        </button>
+      </form>
+
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  function confirmDeleteProduct(e, title, form) {
+    e.preventDefault();
+    confirmDelete('"' + title + '"', function () { form.submit(); });
+  }
+</script>
+{% endblock %}

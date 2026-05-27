@@ -1,0 +1,287 @@
+{% extends "admin/layout/master.html" %}
+{% block title %}Edit Product — VC Shop Admin{% endblock %}
+{% block page_title %}Edit Product{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-text">
+    <h1>Edit Product</h1>
+    <p>Editing: <strong>{{ product.title }}</strong> (ID #{{ product.pro_id }})</p>
+  </div>
+  <div style="display:flex;gap:10px">
+    <a href="{{ url_for('admin.product_view', pro_id=product.pro_id) }}"
+       class="btn-secondary flex items-center gap-2">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+        <circle cx="12" cy="12" r="3"/>
+      </svg>
+      View
+    </a>
+    <a href="{{ url_for('admin.products') }}"
+       class="btn-secondary flex items-center gap-2">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"/>
+        <polyline points="12 19 5 12 12 5"/>
+      </svg>
+      Back
+    </a>
+  </div>
+</div>
+
+<form method="POST" enctype="multipart/form-data" id="edit-product-form">
+
+  <div style="display:grid;grid-template-columns:300px 1fr;gap:24px;align-items:start">
+
+    <!-- ── Left: Image ── -->
+    <div class="table-card" style="padding:24px">
+      <div style="font-family:var(--heading);font-weight:700;font-size:13px;
+                  text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);
+                  margin-bottom:16px">
+        Product Image
+      </div>
+
+      <!-- Upload zone -->
+      <div id="upload-zone"
+           onclick="document.getElementById('image-input').click()"
+           ondragover="event.preventDefault();this.style.borderColor='var(--accent)'"
+           ondragleave="this.style.borderColor='var(--border)'"
+           ondrop="handleDrop(event)"
+           style="border:2px dashed var(--border);border-radius:12px;
+                  min-height:220px;cursor:pointer;
+                  display:flex;flex-direction:column;align-items:center;
+                  justify-content:center;overflow:hidden;position:relative;
+                  transition:border-color .2s">
+
+        {% if product.image %}
+        <!-- Current image shown by default -->
+        <img id="image-preview"
+             src="{{ url_for('static', filename='uploads/' + product.image) }}"
+             alt="{{ product.title }}"
+             style="width:100%;height:220px;object-fit:cover;border-radius:10px"
+             onerror="this.style.display='none';document.getElementById('upload-placeholder').style.display='flex'">
+        <div id="upload-placeholder"
+             style="display:none;flex-direction:column;align-items:center;gap:10px;
+                    padding:24px;text-align:center">
+        {% else %}
+        <img id="image-preview" style="display:none;width:100%;height:220px;object-fit:cover;border-radius:10px">
+        <div id="upload-placeholder"
+             style="display:flex;flex-direction:column;align-items:center;gap:10px;
+                    padding:24px;text-align:center">
+        {% endif %}
+          <div style="width:52px;height:52px;border-radius:12px;
+                      background:var(--accent-light);display:flex;align-items:center;
+                      justify-content:center">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                 stroke-linejoin="round" style="color:var(--accent)">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <polyline points="21 15 16 10 5 21"/>
+            </svg>
+          </div>
+          <div>
+            <p style="font-weight:600;font-size:13px;color:var(--text)">Click to change</p>
+            <p style="font-size:11.5px;color:var(--text-muted);margin-top:2px">
+              or drag &amp; drop image
+            </p>
+          </div>
+        </div>
+
+        <!-- Overlay hint on hover over existing image -->
+        {% if product.image %}
+        <div style="position:absolute;inset:0;background:rgba(0,0,0,.45);
+                    border-radius:10px;display:flex;align-items:center;justify-content:center;
+                    opacity:0;transition:opacity .2s"
+             onmouseenter="this.style.opacity=1" onmouseleave="this.style.opacity=0">
+          <span style="color:#fff;font-size:12.5px;font-weight:600">Click to change image</span>
+        </div>
+        {% endif %}
+
+      </div>
+
+      <input type="file" id="image-input" name="image"
+             accept="image/png,image/jpeg,image/gif,image/webp"
+             style="display:none" onchange="previewImage(this)">
+
+      <p id="file-name"
+         style="margin-top:10px;font-size:11.5px;color:var(--text-muted);text-align:center">
+        {% if product.image %}Current: {{ product.image }}{% else %}No file chosen{% endif %}
+      </p>
+    </div>
+
+    <!-- ── Right: Fields ── -->
+    <div class="table-card" style="padding:28px">
+      <div style="font-family:var(--heading);font-weight:700;font-size:13px;
+                  text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);
+                  margin-bottom:20px">
+        Product Details
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:18px">
+
+        <!-- Title -->
+        <div>
+          <label style="display:block;font-size:12.5px;font-weight:600;
+                        color:var(--text);margin-bottom:6px">
+            Product Title <span style="color:#E8553D">*</span>
+          </label>
+          <input type="text" name="title" required
+                 value="{{ product.title }}"
+                 style="width:100%;padding:10px 14px;border-radius:8px;
+                        border:1.5px solid var(--border);background:var(--input-bg);
+                        color:var(--text);font-size:13.5px;outline:none;
+                        transition:border-color .2s"
+                 onfocus="this.style.borderColor='var(--accent)'"
+                 onblur="this.style.borderColor='var(--border)'">
+        </div>
+
+        <!-- Price -->
+        <div>
+          <label style="display:block;font-size:12.5px;font-weight:600;
+                        color:var(--text);margin-bottom:6px">
+            Price (USD) <span style="color:#E8553D">*</span>
+          </label>
+          <div style="position:relative">
+            <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);
+                         color:var(--text-muted);font-weight:600;font-size:13.5px">$</span>
+            <input type="number" name="price" step="0.01" min="0" required
+                   value="{{ product.price }}"
+                   style="width:100%;padding:10px 14px 10px 26px;border-radius:8px;
+                          border:1.5px solid var(--border);background:var(--input-bg);
+                          color:var(--text);font-size:13.5px;outline:none;
+                          transition:border-color .2s"
+                   onfocus="this.style.borderColor='var(--accent)'"
+                   onblur="this.style.borderColor='var(--border)'">
+          </div>
+        </div>
+
+        <!-- Category -->
+        <div>
+          <label style="display:block;font-size:12.5px;font-weight:600;
+                        color:var(--text);margin-bottom:6px">
+            Category
+          </label>
+          {% if categories %}
+          <select name="cat_id"
+                  style="width:100%;padding:10px 14px;border-radius:8px;
+                         border:1.5px solid var(--border);background:var(--input-bg);
+                         color:var(--text);font-size:13.5px;outline:none;
+                         transition:border-color .2s;cursor:pointer"
+                  onfocus="this.style.borderColor='var(--accent)'"
+                  onblur="this.style.borderColor='var(--border)'">
+            <option value="">— No category —</option>
+            {% for cat in categories %}
+            <option value="{{ cat.cat_id }}"
+                    {% if product.cat_id == cat.cat_id %}selected{% endif %}>
+              {{ cat.category_name }}
+            </option>
+            {% endfor %}
+          </select>
+          {% else %}
+          <div style="padding:10px 14px;border-radius:8px;border:1.5px solid var(--border);
+                      background:var(--hover-bg);font-size:12.5px;color:var(--text-muted)">
+            No categories found
+          </div>
+          <input type="hidden" name="cat_id" value="{{ product.cat_id or '' }}">
+          {% endif %}
+        </div>
+
+        <!-- Description -->
+        <div>
+          <label style="display:block;font-size:12.5px;font-weight:600;
+                        color:var(--text);margin-bottom:6px">
+            Description
+          </label>
+          <textarea name="description" rows="5"
+                    placeholder="Describe this product…"
+                    style="width:100%;padding:10px 14px;border-radius:8px;
+                           border:1.5px solid var(--border);background:var(--input-bg);
+                           color:var(--text);font-size:13.5px;outline:none;
+                           resize:vertical;min-height:110px;transition:border-color .2s"
+                    onfocus="this.style.borderColor='var(--accent)'"
+                    onblur="this.style.borderColor='var(--border)'">{{ product.description }}</textarea>
+        </div>
+
+      </div>
+
+      <!-- Buttons -->
+      <div style="display:flex;align-items:center;gap:12px;margin-top:28px;
+                  padding-top:20px;border-top:1px solid var(--border)">
+        <button type="submit" class="btn-primary"
+                style="display:inline-flex;align-items:center;gap:8px">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round"
+               stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          Save Changes
+        </button>
+        <a href="{{ url_for('admin.products') }}" class="btn-secondary">Cancel</a>
+
+        <!-- Danger zone: delete -->
+        <form method="POST"
+              action="{{ url_for('admin.product_delete', pro_id=product.pro_id) }}"
+              style="margin-left:auto"
+              onsubmit="return confirmDeleteProduct(event, '{{ product.title | e }}', this)">
+          <button type="submit"
+                  style="display:inline-flex;align-items:center;gap:6px;
+                         padding:8px 14px;border-radius:8px;border:1.5px solid #FECACA;
+                         background:transparent;color:#E8553D;font-size:13px;
+                         font-weight:600;cursor:pointer;transition:background .15s"
+                  onmouseenter="this.style.background='#FDECEB'"
+                  onmouseleave="this.style.background='transparent'">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                 stroke-linejoin="round">
+              <polyline points="3 6 5 6 21 6"/>
+              <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+            </svg>
+            Delete Product
+          </button>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+</form>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  function previewImage(input) {
+    if (!input.files || !input.files[0]) return;
+    var file = input.files[0];
+    document.getElementById('file-name').textContent = 'New: ' + file.name;
+    var reader = new FileReader();
+    reader.onload = function (e) {
+      var preview = document.getElementById('image-preview');
+      var placeholder = document.getElementById('upload-placeholder');
+      preview.src = e.target.result;
+      preview.style.display = 'block';
+      placeholder.style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function handleDrop(e) {
+    e.preventDefault();
+    document.getElementById('upload-zone').style.borderColor = 'var(--border)';
+    var files = e.dataTransfer.files;
+    if (files.length) {
+      var input = document.getElementById('image-input');
+      var dt = new DataTransfer();
+      dt.items.add(files[0]);
+      input.files = dt.files;
+      previewImage(input);
+    }
+  }
+
+  function confirmDeleteProduct(e, title, form) {
+    e.preventDefault();
+    confirmDelete('"' + title + '"', function () { form.submit(); });
+  }
+</script>
+{% endblock %}

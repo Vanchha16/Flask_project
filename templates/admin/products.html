@@ -2,110 +2,1279 @@
 {% block title %}Products — VC Shop Admin{% endblock %}
 {% block page_title %}Products{% endblock %}
 
+{% block extra_head %}
+<style>
+  @keyframes vcModalIn {
+    from { opacity:0; transform:translateY(14px) scale(0.97); }
+    to   { opacity:1; transform:translateY(0) scale(1); }
+  }
+  .vc-modal-box { animation: vcModalIn .18s ease-out; }
+
+  .vc-input {
+    width:100%; padding:10px 14px; border-radius:10px;
+    border:1.5px solid var(--border); background:var(--input-bg);
+    color:var(--text); font-size:13.5px; outline:none;
+    transition:border-color .2s; font-family:var(--body);
+  }
+  .vc-input:focus { border-color:var(--accent); }
+
+  .vc-label {
+    display:block; font-size:11px; font-weight:700;
+    text-transform:uppercase; letter-spacing:.07em;
+    color:var(--text-muted); margin-bottom:6px;
+  }
+  .vc-modal-btn-cancel {
+    flex:1; padding:11px 16px; border-radius:10px;
+    border:1.5px solid var(--border); background:var(--hover-bg);
+    color:var(--text); font-size:13.5px; font-weight:600; cursor:pointer;
+    transition:background .15s;
+  }
+  .vc-modal-btn-cancel:hover { background:var(--hover-bg2); }
+
+  /* ── Dropdown filter buttons ── */
+  @keyframes dropIn {
+    from { opacity:0; transform:translateY(-6px) scale(.97); }
+    to   { opacity:1; transform:translateY(0)    scale(1); }
+  }
+  .fdrop-btn {
+    display:inline-flex; align-items:center; gap:7px;
+    padding:7px 13px; border-radius:10px;
+    border:1.5px solid var(--border); background:var(--card-bg);
+    color:var(--text-muted); font-size:13px; font-weight:500;
+    cursor:pointer; transition:all .15s; white-space:nowrap;
+    flex-shrink:0; font-family:var(--body);
+  }
+  .fdrop-btn:hover { border-color:var(--accent); color:var(--text); }
+  .fdrop-btn.active {
+    border-color:var(--accent); background:var(--accent-light);
+    color:var(--accent); font-weight:600;
+  }
+  .fdrop-btn .chev { transition:transform .15s; flex-shrink:0; }
+  .fdrop-btn.open  .chev { transform:rotate(180deg); }
+
+  .fdrop-wrap { position:relative; }
+
+  .fdrop-panel {
+    position:absolute; top:calc(100% + 8px); left:0;
+    background:var(--card-bg); border:1px solid var(--border);
+    border-radius:14px; padding:5px; min-width:176px;
+    box-shadow:0 8px 32px rgba(0,0,0,.13); z-index:600;
+    animation:dropIn .13s ease-out;
+  }
+  .fdrop-opt {
+    display:flex; align-items:center; gap:9px;
+    width:100%; padding:8px 11px; border-radius:9px;
+    border:none; background:transparent; color:var(--text);
+    font-size:13px; font-weight:500; cursor:pointer;
+    text-align:left; transition:background .1s;
+    font-family:var(--body);
+  }
+  .fdrop-opt:hover  { background:var(--hover-bg); }
+  .fdrop-opt.chosen { background:var(--accent-light); color:var(--accent); font-weight:600; }
+  .fdrop-opt .chk   { flex-shrink:0; opacity:0; color:var(--accent); }
+  .fdrop-opt.chosen .chk { opacity:1; }
+  .dot {
+    width:7px; height:7px; border-radius:50%; flex-shrink:0;
+  }
+</style>
+{% endblock %}
+
 {% block content %}
+
+{# ── Page Header ─────────────────────────────────────────── #}
 <div class="page-header">
   <div class="page-header-text">
     <h1>Products</h1>
-    <p>4 products in catalog</p>
+    <p>{{ products | length }} product{{ 's' if products | length != 1 else '' }} in database</p>
   </div>
-  <button class="btn-primary" onclick="openAddProduct()">
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  <button onclick="openAddModal()" class="btn-primary"
+          style="display:inline-flex;align-items:center;gap:8px">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+    </svg>
     Add Product
   </button>
 </div>
 
+{% if products %}
+{# ── Table ───────────────────────────────────────────────── #}
 <div class="table-card">
-  <div class="table-header">
-    <span class="table-title">All Products</span>
-    <span class="badge badge-info">4 products</span>
+  <div style="padding:12px 20px;display:flex;align-items:center;
+              gap:8px;flex-wrap:wrap;border-bottom:1px solid var(--border)">
+
+    {# Search #}
+    <div class="prod-search-box" style="flex:1;min-width:160px;max-width:260px">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input type="text" id="prod-search" placeholder="Search products…"
+             oninput="filterProductRows(this.value)">
+    </div>
+
+    {# Divider #}
+    <div style="width:1px;height:22px;background:var(--border);flex-shrink:0;margin:0 2px"></div>
+
+    {# ── Category dropdown ── #}
+    <div class="fdrop-wrap">
+      <button id="fdrop-cat-btn" class="fdrop-btn" onclick="toggleDrop('cat')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
+          <line x1="8" y1="18" x2="21" y2="18"/>
+          <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/>
+          <line x1="3" y1="18" x2="3.01" y2="18"/>
+        </svg>
+        <span id="fdrop-cat-label">Category</span>
+        <svg class="chev" width="11" height="11" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+             stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div id="fdrop-cat-panel" class="fdrop-panel" style="display:none">
+        <button class="fdrop-opt chosen" onclick="selectDrop('cat','','Category',this)">
+          <svg class="chk" width="12" height="12" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+               stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          All Categories
+        </button>
+        {% for cat in categories %}
+        <button class="fdrop-opt"
+                data-val="{{ cat.cat_id }}"
+                data-label="{{ cat.category_name }}"
+                onclick="selectDrop('cat', this.dataset.val, this.dataset.label, this)">
+          <svg class="chk" width="12" height="12" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+               stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          {{ cat.category_name }}
+        </button>
+        {% endfor %}
+      </div>
+    </div>
+
+    {# ── Price dropdown ── #}
+    <div class="fdrop-wrap">
+      <button id="fdrop-price-btn" class="fdrop-btn" onclick="toggleDrop('price')">
+        <span style="font-size:13px;font-weight:600">$</span>
+        <span id="fdrop-price-label">Price</span>
+        <svg class="chev" width="11" height="11" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+             stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div id="fdrop-price-panel" class="fdrop-panel" style="display:none">
+        <button class="fdrop-opt chosen" onclick="selectDrop('price','','Price',this)">
+          <svg class="chk" width="12" height="12" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+               stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          All Prices
+        </button>
+        <button class="fdrop-opt" onclick="selectDrop('price','under30','Under $30',this)">
+          <svg class="chk" width="12" height="12" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+               stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Under $30
+        </button>
+        <button class="fdrop-opt" onclick="selectDrop('price','30to100','$30–$100',this)">
+          <svg class="chk" width="12" height="12" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+               stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          $30 – $100
+        </button>
+        <button class="fdrop-opt" onclick="selectDrop('price','over100','Over $100',this)">
+          <svg class="chk" width="12" height="12" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+               stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Over $100
+        </button>
+      </div>
+    </div>
+
+    {# ── Stock dropdown ── #}
+    <div class="fdrop-wrap">
+      <button id="fdrop-stock-btn" class="fdrop-btn" onclick="toggleDrop('stock')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
+        </svg>
+        <span id="fdrop-stock-label">Stock</span>
+        <svg class="chev" width="11" height="11" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+             stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div id="fdrop-stock-panel" class="fdrop-panel" style="display:none">
+        <button class="fdrop-opt chosen" onclick="selectDrop('stock','','Stock',this)">
+          <svg class="chk" width="12" height="12" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+               stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          All Stock
+        </button>
+        <button class="fdrop-opt" onclick="selectDrop('stock','instock','In Stock',this)">
+          <svg class="chk" width="12" height="12" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+               stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          <span class="dot" style="background:#059669"></span> In Stock
+        </button>
+        <button class="fdrop-opt" onclick="selectDrop('stock','low','Low Stock',this)">
+          <svg class="chk" width="12" height="12" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+               stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          <span class="dot" style="background:#D97706"></span> Low (1–10)
+        </button>
+        <button class="fdrop-opt" onclick="selectDrop('stock','out','Out of Stock',this)">
+          <svg class="chk" width="12" height="12" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+               stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          <span class="dot" style="background:#E8553D"></span> Out of Stock
+        </button>
+      </div>
+    </div>
+
+    {# ── Status dropdown ── #}
+    <div class="fdrop-wrap">
+      <button id="fdrop-status-btn" class="fdrop-btn" onclick="toggleDrop('status')">
+        <span class="dot" style="background:var(--text-muted)"></span>
+        <span id="fdrop-status-label">Status</span>
+        <svg class="chev" width="11" height="11" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+             stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div id="fdrop-status-panel" class="fdrop-panel" style="display:none">
+        <button class="fdrop-opt chosen" onclick="selectDrop('status','','Status',this)">
+          <svg class="chk" width="12" height="12" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+               stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          All Status
+        </button>
+        <button class="fdrop-opt" onclick="selectDrop('status','active','Active',this)">
+          <svg class="chk" width="12" height="12" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+               stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          <span class="dot" style="background:#059669"></span> Active
+        </button>
+        <button class="fdrop-opt" onclick="selectDrop('status','inactive','Inactive',this)">
+          <svg class="chk" width="12" height="12" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+               stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          <span class="dot" style="background:var(--text-muted)"></span> Inactive
+        </button>
+        <button class="fdrop-opt" onclick="selectDrop('status','out_of_stock','Out of Stock',this)">
+          <svg class="chk" width="12" height="12" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+               stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          <span class="dot" style="background:#E8553D"></span> Out of Stock
+        </button>
+      </div>
+    </div>
+
+    {# Clear pill — shown when any filter is active #}
+    <button id="clear-all-btn" onclick="clearAllFilters()"
+            style="display:none;align-items:center;gap:5px;padding:5px 13px;
+                   border-radius:100px;border:none;background:#FDECEB;
+                   color:#E8553D;font-size:12px;font-weight:700;cursor:pointer;
+                   flex-shrink:0;transition:background .15s;white-space:nowrap"
+            onmouseenter="this.style.background='#fbd5ce'"
+            onmouseleave="this.style.background='#FDECEB'">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="3" stroke-linecap="round">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+      Clear
+    </button>
+
+    <div style="flex:1"></div>
+
+    {# Count badge #}
+    <span id="products-count"
+          style="font-size:11.5px;font-weight:600;padding:4px 12px;border-radius:100px;
+                 background:var(--accent-light);color:var(--accent);white-space:nowrap">
+      {{ products | length }} total
+    </span>
   </div>
-  <div class="table-wrap">
-    <table class="data-table" id="products-table">
+
+  <div style="overflow-x:auto">
+    <table style="width:100%;border-collapse:collapse">
       <thead>
-        <tr>
-          <th>Product</th>
-          <th>SKU</th>
-          <th>Category</th>
-          <th>Price</th>
-          <th>Stock</th>
-          <th>Status</th>
-          <th>Actions</th>
+        <tr style="border-bottom:2px solid var(--border)">
+          <th style="padding:10px 20px;text-align:left;font-size:11px;font-weight:700;
+                     text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">
+            Product
+          </th>
+          <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:700;
+                     text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">
+            Category
+          </th>
+          <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:700;
+                     text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">
+            Price
+          </th>
+          <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:700;
+                     text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">
+            Stock
+          </th>
+          <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:700;
+                     text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">
+            Status
+          </th>
+          <th style="padding:10px 20px;text-align:center;font-size:11px;font-weight:700;
+                     text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);
+                     width:130px">
+            Actions
+          </th>
         </tr>
       </thead>
-      <tbody>
-        <tr>
-          <td class="table-td font-medium" style="color:var(--text)">Classic Men's Jacket</td>
-          <td class="table-td"><span class="font-mono text-xs" style="color:var(--text-muted)">MC-001</span></td>
-          <td class="table-td" style="color:var(--text-muted)">Men's</td>
-          <td class="table-td font-semibold" style="color:var(--text)">$89.99</td>
-          <td class="table-td" style="color:var(--text-muted)">24</td>
-          <td class="table-td"><span class="badge badge-success">Active</span></td>
-          <td class="table-td">
-            <div style="display:flex;gap:6px">
-              <button class="btn-secondary" style="padding:4px 10px;font-size:12px" onclick="showToast('Edit opened')">Edit</button>
-              <button class="btn-secondary" style="padding:4px 10px;font-size:12px;color:#E8553D" onclick="confirmDelete(&#34;Classic Men&#39;s Jacket&#34;, function(){ showToast('Deleted','error'); })">Delete</button>
+      <tbody id="products-tbody">
+        {% for p in products %}
+        <tr class="product-row"
+            data-cat="{{ p.cat_id or '' }}"
+            data-price="{{ p.price }}"
+            data-stock="{{ p.stock or 0 }}"
+            data-status="{{ p.status or 'active' }}"
+            style="border-bottom:1px solid var(--table-row-border);transition:background .15s"
+            onmouseenter="this.style.background='var(--table-row-hover)'"
+            onmouseleave="this.style.background='transparent'">
+
+          {# Image + title #}
+          <td style="padding:13px 20px">
+            <div style="display:flex;align-items:center;gap:12px">
+              {% if p.image %}
+              <div style="width:48px;height:48px;flex-shrink:0;border-radius:10px;
+                          overflow:hidden;border:1px solid var(--border)">
+                <img src="{{ url_for('static', filename='uploads/' + p.image) }}"
+                     alt="{{ p.title }}"
+                     style="width:100%;height:100%;object-fit:cover"
+                     onerror="this.parentElement.style.background='var(--hover-bg2)';
+                              this.parentElement.innerHTML='<div style=\'width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:20px\'>📦</div>'">
+              </div>
+              {% else %}
+              <div style="width:48px;height:48px;flex-shrink:0;border-radius:10px;
+                          background:var(--hover-bg2);border:1px solid var(--border);
+                          display:flex;align-items:center;justify-content:center;font-size:20px">
+                📦
+              </div>
+              {% endif %}
+              <div>
+                <div class="product-name"
+                     style="font-weight:600;font-size:13.5px;color:var(--text);line-height:1.3">
+                  {{ p.title }}
+                </div>
+                <div style="font-size:11px;color:var(--text-muted);margin-top:2px">
+                  ID #{{ p.pro_id }}
+                </div>
+              </div>
+            </div>
+          </td>
+
+          {# Category #}
+          <td style="padding:13px 16px">
+            {% if p.category %}
+            <span style="font-size:11.5px;font-weight:600;padding:3px 10px;border-radius:100px;
+                         background:var(--accent-light);color:var(--accent)">
+              {{ p.category.category_name }}
+            </span>
+            {% else %}
+            <span style="color:var(--text-muted);font-size:12px">—</span>
+            {% endif %}
+          </td>
+
+          {# Price #}
+          <td style="padding:13px 16px;font-weight:700;font-size:14px;color:var(--text)">
+            ${{ "%.2f" | format(p.price) }}
+          </td>
+
+          {# Stock #}
+          <td style="padding:13px 16px">
+            {% set s = p.stock or 0 %}
+            {% if s == 0 %}
+              <span style="font-size:12.5px;font-weight:700;color:#E8553D">0</span>
+            {% elif s <= 10 %}
+              <span style="font-size:12.5px;font-weight:700;color:#D97706">{{ s }}</span>
+            {% else %}
+              <span style="font-size:12.5px;font-weight:700;color:#059669">{{ s }}</span>
+            {% endif %}
+          </td>
+
+          {# Status #}
+          <td style="padding:13px 16px">
+            {% if p.status == 'active' %}
+              <span class="badge badge-active">Active</span>
+            {% elif p.status == 'out_of_stock' %}
+              <span class="badge" style="background:#FDECEB;color:#E8553D">Out of Stock</span>
+            {% else %}
+              <span class="badge" style="background:var(--hover-bg2);color:var(--text-muted)">Inactive</span>
+            {% endif %}
+          </td>
+
+          {# Actions #}
+          <td style="padding:13px 20px">
+            <div style="display:flex;align-items:center;justify-content:center;gap:4px">
+
+              {# View button — passes all data via JSON data attribute #}
+              <button title="View Details" class="btn-icon"
+                      style="display:inline-flex;align-items:center;justify-content:center"
+                      data-product='{{ {
+                        "id":      p.pro_id,
+                        "title":   p.title,
+                        "price":   p.price,
+                        "desc":    p.description or "",
+                        "cat":     p.category.category_name if p.category else "",
+                        "image":   p.image or "",
+                        "stock":   p.stock or 0,
+                        "status":  p.status or "active"
+                      } | tojson }}'
+                      onclick="openViewModal(this)">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+                     stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </button>
+
+              {# Edit button #}
+              <button title="Edit" class="btn-icon"
+                      style="display:inline-flex;align-items:center;justify-content:center"
+                      data-product='{{ {
+                        "id":     p.pro_id,
+                        "title":  p.title,
+                        "price":  p.price,
+                        "desc":   p.description or "",
+                        "cat_id": p.cat_id,
+                        "image":  p.image or "",
+                        "stock":  p.stock or 0,
+                        "status": p.status or "active"
+                      } | tojson }}'
+                      onclick="openEditModal(this)">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+                     stroke-linejoin="round">
+                  <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                  <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+              </button>
+
+              {# Delete button #}
+              <button title="Delete" class="btn-icon btn-danger"
+                      style="display:inline-flex;align-items:center;justify-content:center"
+                      data-id="{{ p.pro_id }}"
+                      data-title="{{ p.title | e }}"
+                      onclick="openDeleteModal(this)">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+                     stroke-linejoin="round">
+                  <polyline points="3 6 5 6 21 6"/>
+                  <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                  <line x1="10" y1="11" x2="10" y2="17"/>
+                  <line x1="14" y1="11" x2="14" y2="17"/>
+                </svg>
+              </button>
+
             </div>
           </td>
         </tr>
-        <tr>
-          <td class="table-td font-medium" style="color:var(--text)">Gold Ring</td>
-          <td class="table-td"><span class="font-mono text-xs" style="color:var(--text-muted)">JW-001</span></td>
-          <td class="table-td" style="color:var(--text-muted)">Jewelry</td>
-          <td class="table-td font-semibold" style="color:var(--text)">$45.00</td>
-          <td class="table-td" style="color:var(--text-muted)">15</td>
-          <td class="table-td"><span class="badge badge-success">Active</span></td>
-          <td class="table-td">
-            <div style="display:flex;gap:6px">
-              <button class="btn-secondary" style="padding:4px 10px;font-size:12px" onclick="showToast('Edit opened')">Edit</button>
-              <button class="btn-secondary" style="padding:4px 10px;font-size:12px;color:#E8553D" onclick="confirmDelete('Gold Ring', function(){ showToast('Deleted','error'); })">Delete</button>
+        {% endfor %}
+        {# No-results row — shown by JS when all rows are filtered out #}
+        <tr id="no-results-row" style="display:none">
+          <td colspan="6" style="padding:48px 20px;text-align:center">
+            <div style="font-size:28px;margin-bottom:10px">🔍</div>
+            <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:6px">
+              No products match your filters
             </div>
-          </td>
-        </tr>
-        <tr>
-          <td class="table-td font-medium" style="color:var(--text)">Women's Summer Dress</td>
-          <td class="table-td"><span class="font-mono text-xs" style="color:var(--text-muted)">WC-001</span></td>
-          <td class="table-td" style="color:var(--text-muted)">Women's</td>
-          <td class="table-td font-semibold" style="color:var(--text)">$65.00</td>
-          <td class="table-td" style="color:#D97706;font-weight:600">3</td>
-          <td class="table-td"><span class="badge badge-warn">Low Stock</span></td>
-          <td class="table-td">
-            <div style="display:flex;gap:6px">
-              <button class="btn-secondary" style="padding:4px 10px;font-size:12px" onclick="showToast('Edit opened')">Edit</button>
-              <button class="btn-secondary" style="padding:4px 10px;font-size:12px;color:#E8553D" onclick="confirmDelete(&#34;Women&#39;s Summer Dress&#34;, function(){ showToast('Deleted','error'); })">Delete</button>
+            <div style="font-size:12.5px;color:var(--text-muted);margin-bottom:16px">
+              Try adjusting or clearing the active filters.
             </div>
-          </td>
-        </tr>
-        <tr>
-          <td class="table-td font-medium" style="color:var(--text)">Wireless Earbuds</td>
-          <td class="table-td"><span class="font-mono text-xs" style="color:var(--text-muted)">EL-001</span></td>
-          <td class="table-td" style="color:var(--text-muted)">Electronics</td>
-          <td class="table-td font-semibold" style="color:var(--text)">$120.00</td>
-          <td class="table-td" style="color:var(--text-muted)">10</td>
-          <td class="table-td"><span class="badge badge-success">Active</span></td>
-          <td class="table-td">
-            <div style="display:flex;gap:6px">
-              <button class="btn-secondary" style="padding:4px 10px;font-size:12px" onclick="showToast('Edit opened')">Edit</button>
-              <button class="btn-secondary" style="padding:4px 10px;font-size:12px;color:#E8553D" onclick="confirmDelete('Wireless Earbuds', function(){ showToast('Deleted','error'); })">Delete</button>
-            </div>
+            <button onclick="clearAllFilters()"
+                    style="padding:7px 18px;border-radius:8px;border:1.5px solid var(--accent);
+                           background:var(--accent-light);color:var(--accent);font-size:12.5px;
+                           font-weight:600;cursor:pointer">
+              Clear all filters
+            </button>
           </td>
         </tr>
       </tbody>
     </table>
   </div>
+
+  <div class="table-footer">
+    <span class="text-muted">
+      {{ products | length }} product{{ 's' if products | length != 1 else '' }}
+      &nbsp;·&nbsp; Click an icon to view, edit, or delete
+    </span>
+  </div>
 </div>
+
+{% else %}
+{# Empty state #}
+<div class="table-card" style="padding:64px 40px;text-align:center">
+  <div style="width:80px;height:80px;border-radius:50%;background:var(--hover-bg2);
+              display:flex;align-items:center;justify-content:center;
+              margin:0 auto 20px;font-size:34px">📦</div>
+  <h3 style="font-family:var(--heading);font-size:17px;font-weight:700;color:var(--text);
+             margin-bottom:8px">No products yet</h3>
+  <p style="color:var(--text-muted);font-size:13px;margin-bottom:24px">
+    Add your first product to get started.
+  </p>
+  <button onclick="openAddModal()" class="btn-primary"
+          style="display:inline-flex;align-items:center;gap:8px">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+    </svg>
+    Add First Product
+  </button>
+</div>
+{% endif %}
+
+
+{# ═══════════════════════════════════════════════════════════
+   MODAL — ADD PRODUCT
+═══════════════════════════════════════════════════════════ #}
+<div id="modal-add"
+     style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);
+            z-index:9999;align-items:center;justify-content:center;
+            padding:16px;backdrop-filter:none">
+  <div class="vc-modal-box"
+       style="background:var(--card-bg);border-radius:20px;width:100%;max-width:520px;
+              max-height:90vh;overflow:hidden;display:flex;flex-direction:column;
+              box-shadow:0 24px 64px rgba(0,0,0,.25)">
+
+    {# Header #}
+    <div style="display:flex;align-items:center;justify-content:space-between;
+                padding:20px 24px;border-bottom:1px solid var(--border);flex-shrink:0">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:34px;height:34px;border-radius:10px;background:var(--accent-light);
+                    display:flex;align-items:center;justify-content:center">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)"
+               stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+        </div>
+        <h2 style="font-family:var(--heading);font-size:16px;font-weight:700;color:var(--text)">
+          Add New Product
+        </h2>
+      </div>
+      <button onclick="closeAddModal()"
+              style="width:30px;height:30px;border-radius:8px;background:var(--hover-bg);
+                     display:flex;align-items:center;justify-content:center;border:none;
+                     cursor:pointer;color:var(--text-muted)"
+              onmouseenter="this.style.background='var(--hover-bg2)'"
+              onmouseleave="this.style.background='var(--hover-bg)'">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    {# Form body #}
+    <form id="form-add" method="POST" action="{{ url_for('admin.product_add') }}"
+          enctype="multipart/form-data"
+          style="overflow-y:auto;flex:1;padding:24px;display:flex;flex-direction:column;gap:18px">
+
+      {# Image upload zone #}
+      <div>
+        <label class="vc-label">Product Image</label>
+        <div id="add-upload-zone"
+             style="width:100%;height:148px;border-radius:14px;border:2px dashed var(--border);
+                    background:var(--hover-bg);cursor:pointer;position:relative;
+                    display:flex;align-items:center;justify-content:center;transition:border-color .2s"
+             onclick="document.getElementById('add-image-input').click()"
+             onmouseenter="this.style.borderColor='var(--accent)'"
+             onmouseleave="this.style.borderColor='var(--border)'">
+          <img id="add-img-preview"
+               style="position:absolute;inset:0;width:100%;height:100%;
+                      object-fit:cover;border-radius:12px;display:none" alt="">
+          <div id="add-img-ph"
+               style="display:flex;flex-direction:column;align-items:center;gap:8px;
+                      pointer-events:none;text-align:center">
+            <div style="width:44px;height:44px;border-radius:12px;background:var(--hover-bg2);
+                        display:flex;align-items:center;justify-content:center">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                   stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round"
+                   stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <polyline points="21 15 16 10 5 21"/>
+              </svg>
+            </div>
+            <span style="font-size:13px;font-weight:500;color:var(--text-muted)">
+              Click to upload image
+            </span>
+            <span style="font-size:11px;color:var(--text-muted);opacity:.7">
+              PNG, JPG, WEBP — max 10 MB
+            </span>
+          </div>
+          <input id="add-image-input" type="file" name="image" accept="image/*"
+                 style="display:none"
+                 onchange="previewImg(this,'add-img-preview','add-img-ph')">
+        </div>
+      </div>
+
+      {# Title #}
+      <div>
+        <label class="vc-label">
+          Product Title <span style="color:#E8553D">*</span>
+        </label>
+        <input type="text" name="title" class="vc-input" required
+               placeholder="e.g. Classic Men's Jacket">
+      </div>
+
+      {# Price + Category #}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div>
+          <label class="vc-label">Price ($) <span style="color:#E8553D">*</span></label>
+          <input type="number" name="price" class="vc-input" required
+                 min="0" step="0.01" placeholder="0.00">
+        </div>
+        <div>
+          <label class="vc-label">Category</label>
+          <select name="cat_id" class="vc-input">
+            <option value="">— None —</option>
+            {% for cat in categories %}
+            <option value="{{ cat.cat_id }}">{{ cat.category_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      {# Stock + Status #}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div>
+          <label class="vc-label">Stock Qty</label>
+          <input type="number" name="stock" class="vc-input" min="0" value="0" placeholder="0">
+        </div>
+        <div>
+          <label class="vc-label">Status</label>
+          <select name="status" class="vc-input">
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+            <option value="out_of_stock">Out of Stock</option>
+          </select>
+        </div>
+      </div>
+
+      {# Description #}
+      <div>
+        <label class="vc-label">Description</label>
+        <textarea name="description" class="vc-input" rows="3"
+                  style="resize:vertical;min-height:78px"
+                  placeholder="Product description…"></textarea>
+      </div>
+
+      {# Footer #}
+      <div style="display:flex;gap:10px;padding-top:4px">
+        <button type="button" onclick="closeAddModal()" class="vc-modal-btn-cancel">
+          Cancel
+        </button>
+        <button type="submit"
+                style="flex:2;padding:11px 16px;border-radius:10px;background:var(--accent);
+                       color:#fff;font-size:13.5px;font-weight:700;border:none;cursor:pointer;
+                       display:inline-flex;align-items:center;justify-content:center;gap:7px;
+                       transition:background .15s"
+                onmouseenter="this.style.background='var(--accent-hover)'"
+                onmouseleave="this.style.background='var(--accent)'">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Add Product
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+{# ═══════════════════════════════════════════════════════════
+   MODAL — VIEW PRODUCT
+═══════════════════════════════════════════════════════════ #}
+<div id="modal-view"
+     style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);
+            z-index:9999;align-items:center;justify-content:center;
+            padding:16px;backdrop-filter:none">
+  <div class="vc-modal-box"
+       style="background:var(--card-bg);border-radius:20px;width:100%;max-width:460px;
+              max-height:90vh;overflow:hidden;display:flex;flex-direction:column;
+              box-shadow:0 24px 64px rgba(0,0,0,.25)">
+
+    {# Header #}
+    <div style="display:flex;align-items:center;justify-content:space-between;
+                padding:20px 24px;border-bottom:1px solid var(--border);flex-shrink:0">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:34px;height:34px;border-radius:10px;background:#EEF2FF;
+                    display:flex;align-items:center;justify-content:center">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6366F1"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </div>
+        <h2 style="font-family:var(--heading);font-size:16px;font-weight:700;color:var(--text)">
+          Product Details
+        </h2>
+      </div>
+      <button onclick="closeViewModal()"
+              style="width:30px;height:30px;border-radius:8px;background:var(--hover-bg);
+                     display:flex;align-items:center;justify-content:center;border:none;
+                     cursor:pointer;color:var(--text-muted)"
+              onmouseenter="this.style.background='var(--hover-bg2)'"
+              onmouseleave="this.style.background='var(--hover-bg)'">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    {# Body #}
+    <div style="overflow-y:auto;flex:1;padding:24px;display:flex;flex-direction:column;gap:20px">
+
+      {# Image + headline #}
+      <div style="display:flex;gap:16px;align-items:flex-start">
+        <div style="width:96px;height:96px;flex-shrink:0;border-radius:14px;overflow:hidden;
+                    border:1px solid var(--border);background:var(--hover-bg2);
+                    display:flex;align-items:center;justify-content:center;font-size:32px">
+          <img id="view-img" style="width:100%;height:100%;object-fit:cover;display:none" alt="">
+          <span id="view-img-ph">📦</span>
+        </div>
+        <div style="flex:1;min-width:0">
+          <div id="view-title"
+               style="font-family:var(--heading);font-size:17px;font-weight:700;
+                      color:var(--text);line-height:1.3;margin-bottom:4px"></div>
+          <div id="view-id"
+               style="font-size:11.5px;color:var(--text-muted);margin-bottom:10px"></div>
+          <div id="view-price"
+               style="font-size:22px;font-weight:800;color:var(--accent);
+                      font-family:var(--heading);margin-bottom:8px"></div>
+          <div id="view-cat-wrap" style="display:none">
+            <span id="view-cat"
+                  style="font-size:12px;font-weight:600;padding:3px 10px;
+                         border-radius:100px;background:var(--accent-light);
+                         color:var(--accent)"></span>
+          </div>
+        </div>
+      </div>
+
+      <div style="height:1px;background:var(--border)"></div>
+
+      {# Stock + Status row #}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div>
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;
+                      letter-spacing:.07em;color:var(--text-muted);margin-bottom:6px">Stock</div>
+          <div id="view-stock" style="font-size:20px;font-weight:800;font-family:var(--heading)"></div>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;
+                      letter-spacing:.07em;color:var(--text-muted);margin-bottom:6px">Status</div>
+          <div id="view-status"></div>
+        </div>
+      </div>
+
+      <div style="height:1px;background:var(--border)"></div>
+
+      {# Description #}
+      <div>
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;
+                    letter-spacing:.07em;color:var(--text-muted);margin-bottom:8px">
+          Description
+        </div>
+        <p id="view-desc"
+           style="font-size:13.5px;color:var(--text);line-height:1.75;
+                  white-space:pre-wrap;word-break:break-word"></p>
+      </div>
+    </div>
+
+    {# Footer #}
+    <div style="padding:16px 24px;border-top:1px solid var(--border);
+                display:flex;gap:10px;flex-shrink:0">
+      <button onclick="closeViewModal()" class="vc-modal-btn-cancel">
+        Close
+      </button>
+    </div>
+  </div>
+</div>
+
+
+{# ═══════════════════════════════════════════════════════════
+   MODAL — EDIT PRODUCT
+═══════════════════════════════════════════════════════════ #}
+<div id="modal-edit"
+     style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);
+            z-index:9999;align-items:center;justify-content:center;
+            padding:16px;backdrop-filter:none">
+  <div class="vc-modal-box"
+       style="background:var(--card-bg);border-radius:20px;width:100%;max-width:520px;
+              max-height:90vh;overflow:hidden;display:flex;flex-direction:column;
+              box-shadow:0 24px 64px rgba(0,0,0,.25)">
+
+    {# Header #}
+    <div style="display:flex;align-items:center;justify-content:space-between;
+                padding:20px 24px;border-bottom:1px solid var(--border);flex-shrink:0">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:34px;height:34px;border-radius:10px;background:#FEF3C7;
+                    display:flex;align-items:center;justify-content:center">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D97706"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+        </div>
+        <h2 style="font-family:var(--heading);font-size:16px;font-weight:700;color:var(--text)">
+          Edit Product
+        </h2>
+      </div>
+      <button onclick="closeEditModal()"
+              style="width:30px;height:30px;border-radius:8px;background:var(--hover-bg);
+                     display:flex;align-items:center;justify-content:center;border:none;
+                     cursor:pointer;color:var(--text-muted)"
+              onmouseenter="this.style.background='var(--hover-bg2)'"
+              onmouseleave="this.style.background='var(--hover-bg)'">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    {# Form body #}
+    <form id="form-edit" method="POST" action="" enctype="multipart/form-data"
+          style="overflow-y:auto;flex:1;padding:24px;display:flex;flex-direction:column;gap:18px">
+
+      {# Image upload zone #}
+      <div>
+        <label class="vc-label">Product Image</label>
+        <div id="edit-upload-zone"
+             style="width:100%;height:148px;border-radius:14px;border:2px dashed var(--border);
+                    background:var(--hover-bg);cursor:pointer;position:relative;
+                    display:flex;align-items:center;justify-content:center;transition:border-color .2s"
+             onclick="document.getElementById('edit-image-input').click()"
+             onmouseenter="this.style.borderColor='var(--accent)'"
+             onmouseleave="this.style.borderColor='var(--border)'">
+          <img id="edit-img-preview"
+               style="position:absolute;inset:0;width:100%;height:100%;
+                      object-fit:cover;border-radius:12px;display:none" alt="">
+          <div id="edit-img-ph"
+               style="display:flex;flex-direction:column;align-items:center;gap:8px;
+                      pointer-events:none;text-align:center">
+            <div style="width:44px;height:44px;border-radius:12px;background:var(--hover-bg2);
+                        display:flex;align-items:center;justify-content:center">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                   stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round"
+                   stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <polyline points="21 15 16 10 5 21"/>
+              </svg>
+            </div>
+            <span style="font-size:13px;font-weight:500;color:var(--text-muted)">
+              Click to change image
+            </span>
+            <span style="font-size:11px;color:var(--text-muted);opacity:.7">
+              Leave empty to keep current image
+            </span>
+          </div>
+          <input id="edit-image-input" type="file" name="image" accept="image/*"
+                 style="display:none"
+                 onchange="previewImg(this,'edit-img-preview','edit-img-ph')">
+        </div>
+      </div>
+
+      {# Title #}
+      <div>
+        <label class="vc-label">
+          Product Title <span style="color:#E8553D">*</span>
+        </label>
+        <input type="text" name="title" id="edit-title" class="vc-input" required>
+      </div>
+
+      {# Price + Category #}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div>
+          <label class="vc-label">Price ($) <span style="color:#E8553D">*</span></label>
+          <input type="number" name="price" id="edit-price" class="vc-input"
+                 required min="0" step="0.01">
+        </div>
+        <div>
+          <label class="vc-label">Category</label>
+          <select name="cat_id" id="edit-cat-id" class="vc-input">
+            <option value="">— None —</option>
+            {% for cat in categories %}
+            <option value="{{ cat.cat_id }}">{{ cat.category_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      {# Stock + Status #}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div>
+          <label class="vc-label">Stock Qty</label>
+          <input type="number" name="stock" id="edit-stock" class="vc-input" min="0" placeholder="0">
+        </div>
+        <div>
+          <label class="vc-label">Status</label>
+          <select name="status" id="edit-status" class="vc-input">
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+            <option value="out_of_stock">Out of Stock</option>
+          </select>
+        </div>
+      </div>
+
+      {# Description #}
+      <div>
+        <label class="vc-label">Description</label>
+        <textarea name="description" id="edit-desc" class="vc-input"
+                  rows="3" style="resize:vertical;min-height:78px"></textarea>
+      </div>
+
+      {# Footer #}
+      <div style="display:flex;gap:10px;padding-top:4px">
+        <button type="button" onclick="closeEditModal()" class="vc-modal-btn-cancel">
+          Cancel
+        </button>
+        <button type="submit"
+                style="flex:2;padding:11px 16px;border-radius:10px;background:#D97706;
+                       color:#fff;font-size:13.5px;font-weight:700;border:none;cursor:pointer;
+                       display:inline-flex;align-items:center;justify-content:center;gap:7px;
+                       transition:background .15s"
+                onmouseenter="this.style.background='#B45309'"
+                onmouseleave="this.style.background='#D97706'">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v14z"/>
+            <polyline points="17 21 17 13 7 13 7 21"/>
+            <polyline points="7 3 7 8 15 8"/>
+          </svg>
+          Save Changes
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+{# ═══════════════════════════════════════════════════════════
+   MODAL — DELETE CONFIRM
+═══════════════════════════════════════════════════════════ #}
+<div id="modal-delete"
+     style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);
+            z-index:9999;align-items:center;justify-content:center;
+            padding:16px;backdrop-filter:none">
+  <div class="vc-modal-box"
+       style="background:var(--card-bg);border-radius:20px;width:100%;max-width:380px;
+              overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,.25)">
+
+    {# Header #}
+    <div style="display:flex;align-items:center;justify-content:space-between;
+                padding:20px 24px;border-bottom:1px solid var(--border)">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:34px;height:34px;border-radius:10px;background:#FDECEB;
+                    display:flex;align-items:center;justify-content:center">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8553D"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+          </svg>
+        </div>
+        <h2 style="font-family:var(--heading);font-size:16px;font-weight:700;color:var(--text)">
+          Delete Product
+        </h2>
+      </div>
+      <button onclick="closeDeleteModal()"
+              style="width:30px;height:30px;border-radius:8px;background:var(--hover-bg);
+                     display:flex;align-items:center;justify-content:center;border:none;
+                     cursor:pointer;color:var(--text-muted)"
+              onmouseenter="this.style.background='var(--hover-bg2)'"
+              onmouseleave="this.style.background='var(--hover-bg)'">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    {# Body #}
+    <div style="padding:32px 24px 20px;text-align:center">
+      <div style="width:64px;height:64px;border-radius:50%;background:#FDECEB;
+                  display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#E8553D"
+             stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="3 6 5 6 21 6"/>
+          <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+          <line x1="10" y1="11" x2="10" y2="17"/>
+          <line x1="14" y1="11" x2="14" y2="17"/>
+        </svg>
+      </div>
+      <h3 style="font-family:var(--heading);font-size:15px;font-weight:700;color:var(--text);
+                 margin-bottom:10px">Are you sure?</h3>
+      <p style="font-size:13px;color:var(--text-muted);line-height:1.65">
+        You are about to permanently delete<br>
+        <strong id="delete-product-name" style="color:var(--text)"></strong>.
+        <br>This action <em>cannot</em> be undone.
+      </p>
+    </div>
+
+    {# Footer #}
+    <form id="form-delete" method="POST" action="">
+      <div style="display:flex;gap:10px;padding:4px 24px 24px">
+        <button type="button" onclick="closeDeleteModal()" class="vc-modal-btn-cancel">
+          Cancel
+        </button>
+        <button type="submit"
+                style="flex:1;padding:11px 16px;border-radius:10px;background:#E8553D;
+                       color:#fff;font-size:13.5px;font-weight:700;border:none;cursor:pointer;
+                       transition:background .15s"
+                onmouseenter="this.style.background='#C0392B'"
+                onmouseleave="this.style.background='#E8553D'">
+          Yes, Delete
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
 {% endblock %}
+
 
 {% block extra_scripts %}
 <script>
-function openAddProduct() {
-  var body = '<div class="form-group"><label>Product Name</label><input type="text" class="form-input" placeholder="e.g. Canvas Backpack"></div>'
-    + '<div class="form-row"><div class="form-group"><label>Price ($)</label><input type="number" step="0.01" class="form-input" placeholder="0.00"></div>'
-    + '<div class="form-group"><label>Stock</label><input type="number" class="form-input" placeholder="0"></div></div>'
-    + '<div class="form-row"><div class="form-group"><label>Category</label><select class="form-input"><option>Men\'s</option><option>Women\'s</option><option>Jewelry</option><option>Electronics</option></select></div>'
-    + '<div class="form-group"><label>SKU</label><input type="text" class="form-input" placeholder="VC-XX-000"></div></div>'
-    + '<div class="modal-actions"><button class="btn-secondary" onclick="closeModal()">Cancel</button>'
-    + '<button class="btn-primary" onclick="closeModal();showToast(\'Product added\')">Add Product</button></div>';
-  openModal('Add Product', body);
-}
+  /* ── helpers ───────────────────────────────────────────── */
+  function previewImg(input, previewId, phId) {
+    if (!input.files[0]) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = document.getElementById(previewId);
+      const ph  = document.getElementById(phId);
+      img.src           = e.target.result;
+      img.style.display = 'block';
+      ph.style.display  = 'none';
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+
+  /* ── Filter state ──────────────────────────────────────── */
+  const _f = { search:'', cat:'', price:'', stock:'', status:'' };
+
+  function toggleDrop(name) {
+    const panel  = document.getElementById('fdrop-' + name + '-panel');
+    const btn    = document.getElementById('fdrop-' + name + '-btn');
+    const isOpen = panel.style.display !== 'none';
+    closeAllDrops();
+    if (!isOpen) { panel.style.display = 'block'; btn.classList.add('open'); }
+  }
+
+  function closeAllDrops() {
+    ['cat','price','stock','status'].forEach(n => {
+      const p = document.getElementById('fdrop-' + n + '-panel');
+      const b = document.getElementById('fdrop-' + n + '-btn');
+      if (p) { p.style.display = 'none'; b.classList.remove('open'); }
+    });
+  }
+
+  function selectDrop(name, value, label, optEl) {
+    _f[name] = value;
+    document.getElementById('fdrop-' + name + '-label').textContent = label;
+    document.getElementById('fdrop-' + name + '-btn').classList.toggle('active', value !== '');
+    const panel = document.getElementById('fdrop-' + name + '-panel');
+    panel.querySelectorAll('.fdrop-opt').forEach(o => o.classList.remove('chosen'));
+    optEl.classList.add('chosen');
+    closeAllDrops();
+    applyFilters();
+  }
+
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.fdrop-wrap')) closeAllDrops();
+  });
+
+  function filterProductRows(q) {
+    _f.search = q.toLowerCase();
+    applyFilters();
+  }
+
+  function applyFilters() {
+    let visible = 0;
+    const total = {{ products | length }};
+
+    document.querySelectorAll('#products-tbody .product-row').forEach(row => {
+      let show = true;
+
+      if (_f.search) {
+        const name = row.querySelector('.product-name')?.textContent.toLowerCase() || '';
+        if (!name.includes(_f.search)) show = false;
+      }
+      if (show && _f.cat)    show = row.dataset.cat    === _f.cat;
+      if (show && _f.price) {
+        const p = parseFloat(row.dataset.price);
+        if      (_f.price === 'under30')  show = p < 30;
+        else if (_f.price === '30to100')  show = p >= 30 && p <= 100;
+        else if (_f.price === 'over100')  show = p > 100;
+      }
+      if (show && _f.stock) {
+        const s = parseInt(row.dataset.stock, 10);
+        if      (_f.stock === 'instock') show = s > 10;
+        else if (_f.stock === 'low')     show = s >= 1 && s <= 10;
+        else if (_f.stock === 'out')     show = s === 0;
+      }
+      if (show && _f.status) show = row.dataset.status === _f.status;
+
+      row.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+
+    /* no-results row */
+    const noRow = document.getElementById('no-results-row');
+    if (noRow) noRow.style.display = visible === 0 ? '' : 'none';
+
+    /* count label */
+    const countEl = document.getElementById('products-count');
+    if (countEl) {
+      const anyActive = Object.values(_f).some(v => v !== '');
+      countEl.textContent = anyActive
+        ? visible + ' of ' + total + ' products'
+        : total + ' total';
+    }
+
+    /* clear pill */
+    const activeCount = Object.values(_f).filter(v => v !== '').length;
+    const clearBtn = document.getElementById('clear-all-btn');
+    if (clearBtn) clearBtn.style.display = activeCount > 0 ? 'inline-flex' : 'none';
+  }
+
+  function clearAllFilters() {
+    Object.keys(_f).forEach(k => _f[k] = '');
+    document.getElementById('prod-search').value = '';
+    [['cat','Category'],['price','Price'],['stock','Stock'],['status','Status']].forEach(([n,def]) => {
+      const lbl   = document.getElementById('fdrop-' + n + '-label');
+      const btn   = document.getElementById('fdrop-' + n + '-btn');
+      const panel = document.getElementById('fdrop-' + n + '-panel');
+      if (lbl) lbl.textContent = def;
+      if (btn) btn.classList.remove('active');
+      if (panel) panel.querySelectorAll('.fdrop-opt').forEach((o,i) => o.classList.toggle('chosen', i === 0));
+    });
+    applyFilters();
+  }
+
+  function _showModal(id)  {
+    document.getElementById(id).style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+  function _hideModal(id)  {
+    document.getElementById(id).style.display = 'none';
+    document.body.style.overflow = '';
+  }
+
+  /* ── ADD ───────────────────────────────────────────────── */
+  function openAddModal() {
+    document.getElementById('form-add').reset();
+    document.getElementById('add-img-preview').style.display = 'none';
+    document.getElementById('add-img-ph').style.display      = 'flex';
+    _showModal('modal-add');
+  }
+  function closeAddModal()   { _hideModal('modal-add'); }
+
+  /* ── VIEW ──────────────────────────────────────────────── */
+  function openViewModal(btn) {
+    const d = JSON.parse(btn.dataset.product);
+
+    document.getElementById('view-title').textContent = d.title;
+    document.getElementById('view-id').textContent    = 'Product ID #' + d.id;
+    document.getElementById('view-price').textContent = '$' + parseFloat(d.price).toFixed(2);
+    document.getElementById('view-desc').textContent  = d.desc || '—';
+
+    /* stock */
+    const stock = d.stock ?? 0;
+    const stockEl = document.getElementById('view-stock');
+    stockEl.textContent = stock;
+    stockEl.style.color = stock === 0 ? '#E8553D' : stock <= 10 ? '#D97706' : '#059669';
+
+    /* status badge */
+    const statusMap = {
+      active:       ['#D1FAE5','#059669','Active'],
+      inactive:     ['var(--hover-bg2)','var(--text-muted)','Inactive'],
+      out_of_stock: ['#FDECEB','#E8553D','Out of Stock']
+    };
+    const [bg, color, label] = statusMap[d.status] || statusMap['active'];
+    document.getElementById('view-status').innerHTML =
+      `<span style="font-size:12px;font-weight:700;padding:4px 12px;border-radius:100px;
+                    background:${bg};color:${color}">${label}</span>`;
+
+    /* category badge */
+    const cw = document.getElementById('view-cat-wrap');
+    if (d.cat) {
+      document.getElementById('view-cat').textContent = d.cat;
+      cw.style.display = 'block';
+    } else {
+      cw.style.display = 'none';
+    }
+
+    /* image */
+    const img = document.getElementById('view-img');
+    const ph  = document.getElementById('view-img-ph');
+    if (d.image) {
+      img.src           = '/static/uploads/' + d.image;
+      img.style.display = 'block';
+      img.onerror       = () => { img.style.display='none'; ph.style.display='block'; };
+      ph.style.display  = 'none';
+    } else {
+      img.style.display = 'none';
+      ph.style.display  = 'block';
+    }
+
+    _showModal('modal-view');
+  }
+  function closeViewModal()  { _hideModal('modal-view'); }
+
+  /* ── EDIT ──────────────────────────────────────────────── */
+  function openEditModal(btn) {
+    const d = JSON.parse(btn.dataset.product);
+
+    document.getElementById('form-edit').action     = '/admin/products/' + d.id + '/edit';
+    document.getElementById('edit-title').value     = d.title;
+    document.getElementById('edit-price').value     = d.price;
+    document.getElementById('edit-desc').value      = d.desc;
+    document.getElementById('edit-cat-id').value    = d.cat_id != null ? String(d.cat_id) : '';
+    document.getElementById('edit-stock').value     = d.stock ?? 0;
+    document.getElementById('edit-status').value    = d.status || 'active';
+    document.getElementById('edit-image-input').value = '';
+
+    /* image preview */
+    const img = document.getElementById('edit-img-preview');
+    const ph  = document.getElementById('edit-img-ph');
+    if (d.image) {
+      img.src           = '/static/uploads/' + d.image;
+      img.style.display = 'block';
+      img.onerror       = () => { img.style.display='none'; ph.style.display='flex'; };
+      ph.style.display  = 'none';
+    } else {
+      img.style.display = 'none';
+      ph.style.display  = 'flex';
+    }
+
+    _showModal('modal-edit');
+  }
+  function closeEditModal()  { _hideModal('modal-edit'); }
+
+  /* ── DELETE ────────────────────────────────────────────── */
+  function openDeleteModal(btn) {
+    document.getElementById('form-delete').action           = '/admin/products/' + btn.dataset.id + '/delete';
+    document.getElementById('delete-product-name').textContent = '"' + btn.dataset.title + '"';
+    _showModal('modal-delete');
+  }
+  function closeDeleteModal() { _hideModal('modal-delete'); }
+
+  /* ── click overlay to close ────────────────────────────── */
+  ['modal-add','modal-view','modal-edit','modal-delete'].forEach(id => {
+    document.getElementById(id).addEventListener('click', function(e) {
+      if (e.target === this) _hideModal(id);
+    });
+  });
+
+  /* ── ESC to close ──────────────────────────────────────── */
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      ['modal-add','modal-view','modal-edit','modal-delete'].forEach(_hideModal);
+    }
+  });
 </script>
 {% endblock %}
