@@ -413,11 +413,13 @@ textarea {
   font-weight: 500;
 }
 
-.stat-change.up {
+.stat-change.up,
+.stat-change.positive {
   color: #0D9668;
 }
 
-.stat-change.down {
+.stat-change.down,
+.stat-change.negative {
   color: #E8553D;
 }
 
@@ -453,6 +455,54 @@ textarea {
   border-radius: var(--radius);
   border: 1px solid var(--border);
   overflow: hidden;
+}
+
+/* ── Table helpers used by server-side templates ── */
+.table-title {
+  font-family: var(--heading);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-table thead tr {
+  background: var(--hover-bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.data-table thead th {
+  padding: 10px 16px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.data-table tbody tr {
+  border-bottom: 1px solid var(--table-row-border);
+  transition: background .12s;
+}
+
+.data-table tbody tr:hover {
+  background: var(--table-row-hover);
+}
+
+.table-td {
+  padding: 11px 16px;
+  font-size: 13.5px;
+  vertical-align: middle;
 }
 
 .table-header {
