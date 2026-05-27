@@ -26,6 +26,8 @@ function dIcon(name, size) {
     copy: '<rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>',
     filter: '<polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>',
     person: '<path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+    cart: '<circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/>',
+    creditcard: '<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>',
   };
   var inner = icons[name] || '';
   return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">' + inner + '</svg>';
@@ -133,6 +135,24 @@ var DASH_STATS = {
   customers: 89, customersPrev: 72,
   avgOrder: 82.35, avgOrderPrev: 82.73,
 };
+
+var DASH_PAYMENTS = [
+  { id: 'PAY-7821', order: 'VC-10421', customer: 'Sarah Chen', amount: 445.94, method: 'Credit Card', status: 'completed', date: '2026-05-20' },
+  { id: 'PAY-7820', order: 'VC-10420', customer: 'James Wilson', amount: 695.00, method: 'PayPal', status: 'completed', date: '2026-05-20' },
+  { id: 'PAY-7819', order: 'VC-10419', customer: 'Maria Garcia', amount: 164.49, method: 'Credit Card', status: 'pending', date: '2026-05-19' },
+  { id: 'PAY-7818', order: 'VC-10418', customer: 'Alex Thompson', amount: 312.27, method: 'Apple Pay', status: 'completed', date: '2026-05-19' },
+  { id: 'PAY-7817', order: 'VC-10417', customer: 'Emily Brown', amount: 299.99, method: 'Credit Card', status: 'completed', date: '2026-05-18' },
+  { id: 'PAY-7816', order: 'VC-10416', customer: 'David Lee', amount: 178.49, method: 'Google Pay', status: 'completed', date: '2026-05-18' },
+  { id: 'PAY-7815', order: 'VC-10415', customer: 'Lisa Park', amount: 523.93, method: 'Credit Card', status: 'completed', date: '2026-05-17' },
+  { id: 'PAY-7814', order: 'VC-10414', customer: 'Tom Harris', amount: 89.99, method: 'PayPal', status: 'refunded', date: '2026-05-17' },
+];
+
+var DASH_CART_SESSIONS = [
+  { id: 'CS-001', customer: 'John Smith', email: 'john.smith@email.com', product: 'Classic Men\'s Jacket', category: 'Men\'s', qty: 1, total: 89.99, updated: '2026-05-25', status: 'active' },
+  { id: 'CS-002', customer: 'Sarah Lee', email: 'sarah.lee@email.com', product: 'Gold Ring', category: 'Jewelry', qty: 2, total: 90.00, updated: '2026-05-24', status: 'active' },
+  { id: 'CS-003', customer: 'Mike Johnson', email: 'mike.johnson@email.com', product: 'Women\'s Summer Dress', category: 'Women\'s', qty: 1, total: 65.00, updated: '2026-05-22', status: 'abandoned' },
+  { id: 'CS-004', customer: 'Emma Davis', email: 'emma.davis@email.com', product: 'Wireless Earbuds', category: 'Electronics', qty: 1, total: 120.00, updated: '2026-05-20', status: 'abandoned' },
+];
 
 /* ══════════════════════════════════════════
    CHARTS
@@ -1219,6 +1239,92 @@ function renderBilling() {
 }
 
 /* ══════════════════════════════════════════
+   PAYMENTS PAGE
+══════════════════════════════════════════ */
+function renderPayments() {
+  var statusMap = {
+    completed: { bg: 'var(--badge-success-bg)', text: 'var(--badge-success)', label: 'Completed' },
+    pending:   { bg: 'var(--badge-warn-bg)',    text: 'var(--badge-warn)',    label: 'Pending' },
+    refunded:  { bg: 'var(--badge-info-bg)',    text: 'var(--badge-info)',    label: 'Refunded' },
+    failed:    { bg: 'var(--badge-danger-bg)',  text: 'var(--badge-danger)',  label: 'Failed' },
+  };
+  var methodIcon = {
+    'Credit Card': dIcon('creditcard', 14),
+    'PayPal':      dIcon('creditcard', 14),
+    'Apple Pay':   dIcon('creditcard', 14),
+    'Google Pay':  dIcon('creditcard', 14),
+  };
+  var totalRevenue = DASH_PAYMENTS.filter(function(p){ return p.status === 'completed'; }).reduce(function(s,p){ return s + p.amount; }, 0);
+  var pendingCount = DASH_PAYMENTS.filter(function(p){ return p.status === 'pending'; }).length;
+  var refundedCount = DASH_PAYMENTS.filter(function(p){ return p.status === 'refunded'; }).length;
+
+  var rows = DASH_PAYMENTS.map(function(p) {
+    var s = statusMap[p.status] || statusMap.completed;
+    return '<tr>'
+      + '<td class="table-td"><span class="font-mono text-xs" style="color:var(--accent)">' + p.id + '</span></td>'
+      + '<td class="table-td"><span class="font-mono text-xs" style="color:var(--text-muted)">' + p.order + '</span></td>'
+      + '<td class="table-td"><span style="color:var(--text)">' + p.customer + '</span></td>'
+      + '<td class="table-td"><span class="font-semibold" style="color:var(--text)">$' + p.amount.toFixed(2) + '</span></td>'
+      + '<td class="table-td"><div class="flex items-center gap-1.5" style="color:var(--text-muted)">' + (methodIcon[p.method] || '') + '<span class="text-sm">' + p.method + '</span></div></td>'
+      + '<td class="table-td"><span style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:' + s.bg + ';color:' + s.text + '">' + s.label + '</span></td>'
+      + '<td class="table-td text-sm" style="color:var(--text-muted)">' + p.date + '</td>'
+      + '</tr>';
+  }).join('');
+
+  return '<div class="page-header"><div class="page-header-text"><h1>Payments</h1><p>' + DASH_PAYMENTS.length + ' transactions</p></div>'
+    + '<button class="btn-secondary" onclick="showToast(\'Exported payments CSV\');">' + dIcon('download', 15) + ' Export</button></div>'
+    + '<div class="stats-grid" style="margin-bottom:24px">'
+    + '<div class="stat-card"><div class="stat-icon" style="background:var(--accent-light);color:var(--accent)">' + dIcon('dollar', 18) + '</div><div class="stat-body"><div class="stat-label">Total Revenue</div><div class="stat-value">$' + totalRevenue.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) + '</div></div></div>'
+    + '<div class="stat-card"><div class="stat-icon" style="background:#FEF3C7;color:#D97706">' + dIcon('creditcard', 18) + '</div><div class="stat-body"><div class="stat-label">Transactions</div><div class="stat-value">' + DASH_PAYMENTS.length + '</div></div></div>'
+    + '<div class="stat-card"><div class="stat-icon" style="background:#FEF9C3;color:#CA8A04">' + dIcon('bell', 18) + '</div><div class="stat-body"><div class="stat-label">Pending</div><div class="stat-value">' + pendingCount + '</div></div></div>'
+    + '<div class="stat-card"><div class="stat-icon" style="background:#EDE9FE;color:#7C3AED">' + dIcon('download', 18) + '</div><div class="stat-body"><div class="stat-label">Refunded</div><div class="stat-value">' + refundedCount + '</div></div></div>'
+    + '</div>'
+    + '<div class="table-card"><div class="table-header"><span class="table-title">All Transactions</span>'
+    + '<span style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:var(--accent-light);color:var(--accent)">' + DASH_PAYMENTS.length + ' records</span></div>'
+    + '<div class="table-wrap"><table class="data-table"><thead><tr>'
+    + '<th>Payment ID</th><th>Order</th><th>Customer</th><th>Amount</th><th>Method</th><th>Status</th><th>Date</th>'
+    + '</tr></thead><tbody>' + rows + '</tbody></table></div></div>';
+}
+
+/* ══════════════════════════════════════════
+   CART PAGE
+══════════════════════════════════════════ */
+function renderCart() {
+  var statusMap = {
+    active:    { bg: 'var(--badge-success-bg)', text: 'var(--badge-success)', label: 'Active' },
+    abandoned: { bg: 'var(--badge-warn-bg)',    text: 'var(--badge-warn)',    label: 'Abandoned' },
+  };
+  var activeCarts    = DASH_CART_SESSIONS.filter(function(c){ return c.status === 'active'; }).length;
+  var abandonedCarts = DASH_CART_SESSIONS.filter(function(c){ return c.status === 'abandoned'; }).length;
+  var totalValue     = DASH_CART_SESSIONS.reduce(function(s,c){ return s + c.total; }, 0);
+
+  var rows = DASH_CART_SESSIONS.map(function(c) {
+    var s = statusMap[c.status] || statusMap.active;
+    var initials = c.customer.split(' ').map(function(w){ return w[0]; }).join('').slice(0,2).toUpperCase();
+    return '<tr>'
+      + '<td class="table-td"><div class="flex items-center gap-2"><div class="avatar-sm">' + initials + '</div><div><div class="text-sm font-medium" style="color:var(--text)">' + c.customer + '</div><div class="text-xs" style="color:var(--text-muted)">' + c.email + '</div></div></div></td>'
+      + '<td class="table-td"><div class="text-sm font-medium" style="color:var(--text)">' + c.product + '</div><div class="text-xs" style="color:var(--text-muted)">' + c.category + '</div></td>'
+      + '<td class="table-td text-sm" style="color:var(--text-muted)">× ' + c.qty + '</td>'
+      + '<td class="table-td font-semibold text-sm" style="color:var(--text)">$' + c.total.toFixed(2) + '</td>'
+      + '<td class="table-td text-sm" style="color:var(--text-muted)">' + c.updated + '</td>'
+      + '<td class="table-td"><span style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:' + s.bg + ';color:' + s.text + '">' + s.label + '</span></td>'
+      + '</tr>';
+  }).join('');
+
+  return '<div class="page-header"><div class="page-header-text"><h1>Cart</h1><p>' + DASH_CART_SESSIONS.length + ' cart sessions</p></div></div>'
+    + '<div class="stats-grid" style="margin-bottom:24px">'
+    + '<div class="stat-card"><div class="stat-icon" style="background:var(--badge-success-bg);color:var(--badge-success)">' + dIcon('cart', 18) + '</div><div class="stat-body"><div class="stat-label">Active Carts</div><div class="stat-value">' + activeCarts + '</div></div></div>'
+    + '<div class="stat-card"><div class="stat-icon" style="background:var(--badge-warn-bg);color:var(--badge-warn)">' + dIcon('bell', 18) + '</div><div class="stat-body"><div class="stat-label">Abandoned</div><div class="stat-value">' + abandonedCarts + '</div></div></div>'
+    + '<div class="stat-card"><div class="stat-icon" style="background:var(--accent-light);color:var(--accent)">' + dIcon('dollar', 18) + '</div><div class="stat-body"><div class="stat-label">Cart Value</div><div class="stat-value">$' + totalValue.toFixed(2) + '</div></div></div>'
+    + '</div>'
+    + '<div class="table-card"><div class="table-header"><span class="table-title">All Cart Sessions</span>'
+    + '<span style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:var(--accent-light);color:var(--accent)">' + DASH_CART_SESSIONS.length + ' sessions</span></div>'
+    + '<div class="table-wrap"><table class="data-table"><thead><tr>'
+    + '<th>Customer</th><th>Product</th><th>Qty</th><th>Total</th><th>Last Updated</th><th>Status</th>'
+    + '</tr></thead><tbody>' + rows + '</tbody></table></div></div>';
+}
+
+/* ══════════════════════════════════════════
    HELP & SUPPORT PAGE
 ══════════════════════════════════════════ */
 function renderHelp() {
@@ -1344,8 +1450,8 @@ var currentPage = 'overview';
 var sidebarCollapsed = false;
 var unsavedChanges = false;
 
-var PAGE_LABELS = { overview: 'Overview', analytics: 'Analytics', products: 'Products', orders: 'Orders', customers: 'Customers', inventory: 'Inventory', coupons: 'Coupons', reviews: 'Reviews', users: 'Users', settings: 'Settings', profile: 'My Profile', billing: 'Billing', help: 'Help & Support', 'product-detail': 'Product Detail' };
-var SIDEBAR_PAGES = ['overview', 'analytics', 'products', 'orders', 'customers', 'users', 'inventory', 'coupons', 'reviews', 'settings'];
+var PAGE_LABELS = { overview: 'Overview', analytics: 'Analytics', products: 'Products', orders: 'Orders', customers: 'Customers', inventory: 'Inventory', coupons: 'Coupons', reviews: 'Reviews', users: 'Users', payments: 'Payments', cart: 'Cart', settings: 'Settings', profile: 'My Profile', billing: 'Billing', help: 'Help & Support', 'product-detail': 'Product Detail' };
+var SIDEBAR_PAGES = ['overview', 'analytics', 'products', 'orders', 'customers', 'users', 'inventory', 'coupons', 'reviews', 'payments', 'cart', 'settings'];
 
 function navigateTo(page, force) {
   if (!force && unsavedChanges && (page !== currentPage)) {
@@ -1360,7 +1466,7 @@ function navigateTo(page, force) {
   if (page === 'orders') ordFilters = { search: '', status: '', payment: '' };
   destroyCharts();
   var content = document.getElementById('page-content');
-  var pages = { overview: renderOverview, analytics: renderAnalytics, products: renderProducts, orders: renderOrders, customers: renderCustomers, inventory: renderInventory, coupons: renderCoupons, reviews: renderReviews, users: renderUsers, settings: renderSettings, profile: renderProfile, billing: renderBilling, help: renderHelp, 'product-detail': renderProductDetail };
+  var pages = { overview: renderOverview, analytics: renderAnalytics, products: renderProducts, orders: renderOrders, customers: renderCustomers, inventory: renderInventory, coupons: renderCoupons, reviews: renderReviews, users: renderUsers, payments: renderPayments, cart: renderCart, settings: renderSettings, profile: renderProfile, billing: renderBilling, help: renderHelp, 'product-detail': renderProductDetail };
   content.innerHTML = (pages[page] || renderOverview)();
   requestAnimationFrame(function () {
     if (page === 'overview') { renderOverviewCharts(); }
@@ -1659,6 +1765,8 @@ function profileAction(action) {
     { page: 'inventory', icon: 'box', label: 'Inventory' },
     { page: 'coupons', icon: 'tag', label: 'Coupons' },
     { page: 'reviews', icon: 'star', label: 'Reviews' },
+    { page: 'payments', icon: 'creditcard', label: 'Payments' },
+    { page: 'cart', icon: 'cart', label: 'Cart' },
   ];
   var nav = document.getElementById('sidebar-nav');
   items.forEach(function (item) {
@@ -1680,6 +1788,35 @@ function profileAction(action) {
   settingsDiv.addEventListener('click', function () { navigateTo('settings'); });
   nav.appendChild(settingsDiv);
 
+  // Store Pages divider
+  var storeDivider = document.createElement('div');
+  storeDivider.className = 'sidebar-divider';
+  nav.appendChild(storeDivider);
+  var storeLabel = document.createElement('div');
+  storeLabel.style.cssText = 'font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:6px 16px 4px;color:var(--text-muted);opacity:.6';
+  storeLabel.textContent = 'Store Pages';
+  nav.appendChild(storeLabel);
+  var storeLinks = [
+    { href: '/',         icon: 'home',    label: 'Home' },
+    { href: '/shop',     icon: 'package', label: 'Shop' },
+    { href: '/cart',     icon: 'cart',    label: 'Cart' },
+    { href: '/payment',  icon: 'creditcard', label: 'Payment' },
+    { href: '/login',    icon: 'person',  label: 'Login' },
+    { href: '/signup',   icon: 'plus',    label: 'Sign Up' },
+    { href: '/profile',  icon: 'users',   label: 'Profile' },
+  ];
+  storeLinks.forEach(function(link) {
+    var a = document.createElement('a');
+    a.href = link.href;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.className = 'nav-item';
+    a.style.opacity = '.8';
+    a.innerHTML = dIcon(link.icon, 18) + '<span>' + link.label + '</span>'
+      + '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left:auto;opacity:.5"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
+    nav.appendChild(a);
+  });
+
   // Theme toggle
   var SUN_ICON = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>';
   var MOON_ICON = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>';
@@ -1695,7 +1832,7 @@ function profileAction(action) {
     applyChartDefaults();
     destroyCharts();
     var content = document.getElementById('page-content');
-    var pages = { overview: renderOverview, analytics: renderAnalytics, products: renderProducts, orders: renderOrders, customers: renderCustomers, inventory: renderInventory, coupons: renderCoupons, reviews: renderReviews, users: renderUsers, settings: renderSettings, profile: renderProfile, billing: renderBilling, help: renderHelp, 'product-detail': renderProductDetail };
+    var pages = { overview: renderOverview, analytics: renderAnalytics, products: renderProducts, orders: renderOrders, customers: renderCustomers, inventory: renderInventory, coupons: renderCoupons, reviews: renderReviews, users: renderUsers, payments: renderPayments, cart: renderCart, settings: renderSettings, profile: renderProfile, billing: renderBilling, help: renderHelp, 'product-detail': renderProductDetail };
     var fn = pages[currentPage];
     if (fn) {
       content.innerHTML = fn();
