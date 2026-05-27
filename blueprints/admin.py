@@ -14,9 +14,24 @@ def products():
     return render_template("admin/products.html")
 
 
+@admin_bp.route("/categories")
+def categories():
+    return render_template("admin/categories.html")
+
+
 @admin_bp.route("/orders")
 def orders():
     return render_template("admin/orders.html")
+
+
+@admin_bp.route("/payments")
+def payments():
+    return render_template("admin/payments.html")
+
+
+@admin_bp.route("/cart")
+def cart():
+    return render_template("admin/cart.html")
 
 
 @admin_bp.route("/customers")
@@ -24,6 +39,6 @@ def customers():
     return render_template("admin/customers.html")
 
 
-@admin_bp.route("/categories")
-def categories():
-    return render_template("admin/categories.html")
+@admin_bp.route("/users")
+def users():
+    return render_template("admin/users.html")
