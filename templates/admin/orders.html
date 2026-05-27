@@ -1,6 +1,63 @@
 {% extends "admin/layout/master.html" %}
-
 {% block title %}Orders — VC Shop Admin{% endblock %}
+{% block page_title %}Orders{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-text"><h1>Orders</h1><p>4 recent orders</p></div>
+</div>
+<div class="table-card">
+  <div class="table-header"><span class="table-title">All Orders</span><span class="badge badge-info">4 orders</span></div>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>Order ID</th><th>Customer</th><th>Items</th><th>Total</th><th>Payment</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="table-td"><span class="font-mono text-xs" style="color:var(--accent)">VC-10421</span></td>
+          <td class="table-td" style="color:var(--text)">Sarah Chen</td>
+          <td class="table-td" style="color:var(--text-muted)">3</td>
+          <td class="table-td font-semibold" style="color:var(--text)">$445.94</td>
+          <td class="table-td" style="color:var(--text-muted)">Credit Card</td>
+          <td class="table-td"><span class="badge badge-success">Delivered</span></td>
+          <td class="table-td" style="color:var(--text-muted)">2026-05-20</td>
+          <td class="table-td"><button class="btn-secondary" style="padding:4px 10px;font-size:12px" onclick="showToast('Order details opened')">View</button></td>
+        </tr>
+        <tr>
+          <td class="table-td"><span class="font-mono text-xs" style="color:var(--accent)">VC-10420</span></td>
+          <td class="table-td" style="color:var(--text)">James Wilson</td>
+          <td class="table-td" style="color:var(--text-muted)">1</td>
+          <td class="table-td font-semibold" style="color:var(--text)">$695.00</td>
+          <td class="table-td" style="color:var(--text-muted)">PayPal</td>
+          <td class="table-td"><span class="badge badge-info">Shipped</span></td>
+          <td class="table-td" style="color:var(--text-muted)">2026-05-20</td>
+          <td class="table-td"><button class="btn-secondary" style="padding:4px 10px;font-size:12px" onclick="showToast('Order details opened')">View</button></td>
+        </tr>
+        <tr>
+          <td class="table-td"><span class="font-mono text-xs" style="color:var(--accent)">VC-10419</span></td>
+          <td class="table-td" style="color:var(--text)">Maria Garcia</td>
+          <td class="table-td" style="color:var(--text-muted)">2</td>
+          <td class="table-td font-semibold" style="color:var(--text)">$164.49</td>
+          <td class="table-td" style="color:var(--text-muted)">Credit Card</td>
+          <td class="table-td"><span class="badge badge-warn">Processing</span></td>
+          <td class="table-td" style="color:var(--text-muted)">2026-05-19</td>
+          <td class="table-td"><button class="btn-secondary" style="padding:4px 10px;font-size:12px" onclick="showToast('Order details opened')">View</button></td>
+        </tr>
+        <tr>
+          <td class="table-td"><span class="font-mono text-xs" style="color:var(--accent)">VC-10418</span></td>
+          <td class="table-td" style="color:var(--text)">Alex Thompson</td>
+          <td class="table-td" style="color:var(--text-muted)">4</td>
+          <td class="table-td font-semibold" style="color:var(--text)">$312.27</td>
+          <td class="table-td" style="color:var(--text-muted)">Apple Pay</td>
+          <td class="table-td"><span class="badge badge-danger">Cancelled</span></td>
+          <td class="table-td" style="color:var(--text-muted)">2026-05-19</td>
+          <td class="table-td"><button class="btn-secondary" style="padding:4px 10px;font-size:12px" onclick="showToast('Order details opened')">View</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+{# end #}
 {% block topbar_title %}Orders{% endblock %}
 {% block topbar_subtitle %}Track and manage customer orders.{% endblock %}
 

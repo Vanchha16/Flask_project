@@ -1,0 +1,78 @@
+{% extends "admin/layout/master.html" %}
+{% block title %}Coupons — VC Shop Admin{% endblock %}
+{% block page_title %}Coupons{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-text"><h1>Coupons</h1><p>4 discount codes</p></div>
+  <button class="btn-primary" onclick="openAddCoupon()">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    Add Coupon
+  </button>
+</div>
+<div class="table-card">
+  <div class="table-header"><span class="table-title">All Coupons</span><span class="badge badge-info">4 codes</span></div>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>Code</th><th>Type</th><th>Value</th><th>Min. Order</th><th>Uses</th><th>Expires</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="table-td"><code style="background:var(--hover-bg);padding:2px 8px;border-radius:4px;font-size:12px;color:var(--accent)">SUMMER20</code></td>
+          <td class="table-td" style="color:var(--text-muted)">Percentage</td>
+          <td class="table-td font-semibold" style="color:var(--text)">20%</td>
+          <td class="table-td" style="color:var(--text-muted)">$50</td>
+          <td class="table-td" style="color:var(--text-muted)">142 / 500</td>
+          <td class="table-td" style="color:var(--text-muted)">2026-08-31</td>
+          <td class="table-td"><span class="badge badge-success">Active</span></td>
+          <td class="table-td"><button class="btn-secondary" style="padding:4px 10px;font-size:12px;color:#E8553D" onclick="confirmDelete('SUMMER20', function(){ showToast('Coupon deleted','error'); })">Delete</button></td>
+        </tr>
+        <tr>
+          <td class="table-td"><code style="background:var(--hover-bg);padding:2px 8px;border-radius:4px;font-size:12px;color:var(--accent)">WELCOME10</code></td>
+          <td class="table-td" style="color:var(--text-muted)">Percentage</td>
+          <td class="table-td font-semibold" style="color:var(--text)">10%</td>
+          <td class="table-td" style="color:var(--text-muted)">—</td>
+          <td class="table-td" style="color:var(--text-muted)">891 / ∞</td>
+          <td class="table-td" style="color:var(--text-muted)">No expiry</td>
+          <td class="table-td"><span class="badge badge-success">Active</span></td>
+          <td class="table-td"><button class="btn-secondary" style="padding:4px 10px;font-size:12px;color:#E8553D" onclick="confirmDelete('WELCOME10', function(){ showToast('Coupon deleted','error'); })">Delete</button></td>
+        </tr>
+        <tr>
+          <td class="table-td"><code style="background:var(--hover-bg);padding:2px 8px;border-radius:4px;font-size:12px;color:var(--accent)">FREESHIP</code></td>
+          <td class="table-td" style="color:var(--text-muted)">Free Shipping</td>
+          <td class="table-td font-semibold" style="color:var(--text)">—</td>
+          <td class="table-td" style="color:var(--text-muted)">$30</td>
+          <td class="table-td" style="color:var(--text-muted)">234 / 1000</td>
+          <td class="table-td" style="color:var(--text-muted)">2026-06-30</td>
+          <td class="table-td"><span class="badge badge-success">Active</span></td>
+          <td class="table-td"><button class="btn-secondary" style="padding:4px 10px;font-size:12px;color:#E8553D" onclick="confirmDelete('FREESHIP', function(){ showToast('Coupon deleted','error'); })">Delete</button></td>
+        </tr>
+        <tr>
+          <td class="table-td"><code style="background:var(--hover-bg);padding:2px 8px;border-radius:4px;font-size:12px;color:var(--text-muted)">FLASH50</code></td>
+          <td class="table-td" style="color:var(--text-muted)">Fixed</td>
+          <td class="table-td font-semibold" style="color:var(--text)">$50</td>
+          <td class="table-td" style="color:var(--text-muted)">$200</td>
+          <td class="table-td" style="color:var(--text-muted)">50 / 50</td>
+          <td class="table-td" style="color:var(--text-muted)">2026-05-01</td>
+          <td class="table-td"><span class="badge badge-danger">Expired</span></td>
+          <td class="table-td"><button class="btn-secondary" style="padding:4px 10px;font-size:12px;color:#E8553D" onclick="confirmDelete('FLASH50', function(){ showToast('Coupon deleted','error'); })">Delete</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function openAddCoupon() {
+  var body = '<div class="form-row"><div class="form-group"><label>Coupon Code</label><input type="text" class="form-input" placeholder="e.g. SAVE15"></div>'
+    + '<div class="form-group"><label>Type</label><select class="form-input"><option>Percentage</option><option>Fixed</option><option>Free Shipping</option></select></div></div>'
+    + '<div class="form-row"><div class="form-group"><label>Value</label><input type="number" class="form-input" placeholder="0"></div>'
+    + '<div class="form-group"><label>Min. Order ($)</label><input type="number" class="form-input" placeholder="0"></div></div>'
+    + '<div class="form-group"><label>Expiry Date</label><input type="date" class="form-input"></div>'
+    + '<div class="modal-actions"><button class="btn-secondary" onclick="closeModal()">Cancel</button>'
+    + '<button class="btn-primary" onclick="closeModal();showToast(\'Coupon created\')">Create Coupon</button></div>';
+  openModal('Add Coupon', body);
+}
+</script>
+{% endblock %}

@@ -6,11 +6,25 @@
 <div class="page-header">
   <div class="page-header-text"><h1>Inventory</h1><p>4 products tracked</p></div>
 </div>
+<div class="stats-grid" style="margin-bottom:24px">
+  <div class="stat-card">
+    <div class="stat-icon" style="background:#D1FAE5;color:#059669"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+    <div class="stat-body"><div class="stat-label">In Stock</div><div class="stat-value">2</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:#FEF3C7;color:#D97706"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg></div>
+    <div class="stat-body"><div class="stat-label">Low Stock</div><div class="stat-value">1</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:#FEE2E2;color:#DC2626"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+    <div class="stat-body"><div class="stat-label">Out of Stock</div><div class="stat-value">1</div></div>
+  </div>
+</div>
 <div class="table-card">
   <div class="table-header"><span class="table-title">Stock Levels</span><span class="badge badge-info">4 products</span></div>
   <div class="table-wrap">
     <table class="data-table">
-      <thead><tr><th>Product</th><th>SKU</th><th>Category</th><th>In Stock</th><th>Status</th></tr></thead>
+      <thead><tr><th>Product</th><th>SKU</th><th>Category</th><th>In Stock</th><th>Status</th><th>Actions</th></tr></thead>
       <tbody>
         <tr>
           <td class="table-td font-medium" style="color:var(--text)">Canvas Backpack</td>
@@ -18,6 +32,7 @@
           <td class="table-td" style="color:var(--text-muted)">Men's</td>
           <td class="table-td" style="color:var(--text-muted)">45</td>
           <td class="table-td"><span class="badge badge-success">In Stock</span></td>
+          <td class="table-td"><button class="btn-secondary" style="padding:4px 10px;font-size:12px" onclick="showToast('Stock updated')">Update</button></td>
         </tr>
         <tr>
           <td class="table-td font-medium" style="color:var(--text)">Diamond Ring</td>
@@ -25,6 +40,7 @@
           <td class="table-td" style="color:var(--text-muted)">Jewelry</td>
           <td class="table-td" style="color:var(--text-muted)">8</td>
           <td class="table-td"><span class="badge badge-success">In Stock</span></td>
+          <td class="table-td"><button class="btn-secondary" style="padding:4px 10px;font-size:12px" onclick="showToast('Stock updated')">Update</button></td>
         </tr>
         <tr>
           <td class="table-td font-medium" style="color:var(--text)">Knit Cardigan</td>
@@ -32,6 +48,7 @@
           <td class="table-td" style="color:var(--text-muted)">Women's</td>
           <td class="table-td" style="color:#D97706;font-weight:600">3</td>
           <td class="table-td"><span class="badge badge-warn">Low Stock</span></td>
+          <td class="table-td"><button class="btn-secondary" style="padding:4px 10px;font-size:12px" onclick="showToast('Restock order placed')">Restock</button></td>
         </tr>
         <tr>
           <td class="table-td font-medium" style="color:var(--text)">Casual Slim Shirt</td>
@@ -39,80 +56,10 @@
           <td class="table-td" style="color:var(--text-muted)">Men's</td>
           <td class="table-td" style="color:#E8553D;font-weight:600">0</td>
           <td class="table-td"><span class="badge badge-danger">Out of Stock</span></td>
+          <td class="table-td"><button class="btn-secondary" style="padding:4px 10px;font-size:12px" onclick="showToast('Restock order placed')">Restock</button></td>
         </tr>
       </tbody>
     </table>
   </div>
 </div>
-{% endblock %}
-{# end #}
-{% block topbar_title %}Categories{% endblock %}
-{% block topbar_subtitle %}Manage your product categories.{% endblock %}
-
-{% block content %}
-
-<div class="page-header">
-  <div class="page-header-text">
-    <h1>Categories</h1>
-    <p>4 active categories</p>
-  </div>
-  <a href="#" class="btn btn-primary">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-    </svg>
-    Add Category
-  </a>
-</div>
-
-<div class="card">
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Category Name</th>
-          <th>Description</th>
-          <th>Products</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
-
-        <tr>
-          <td style="color:var(--text-muted);">01</td>
-          <td><strong>Men's Clothing</strong></td>
-          <td style="color:var(--text-muted);">Men's apparel and accessories</td>
-          <td>5 products</td>
-          <td><span class="badge badge-success">Active</span></td>
-        </tr>
-
-        <tr>
-          <td style="color:var(--text-muted);">02</td>
-          <td><strong>Women's Clothing</strong></td>
-          <td style="color:var(--text-muted);">Women's fashion and clothing</td>
-          <td>8 products</td>
-          <td><span class="badge badge-success">Active</span></td>
-        </tr>
-
-        <tr>
-          <td style="color:var(--text-muted);">03</td>
-          <td><strong>Jewelry</strong></td>
-          <td style="color:var(--text-muted);">Rings, bracelets, earrings and necklaces</td>
-          <td>4 products</td>
-          <td><span class="badge badge-success">Active</span></td>
-        </tr>
-
-        <tr>
-          <td style="color:var(--text-muted);">04</td>
-          <td><strong>Electronics</strong></td>
-          <td style="color:var(--text-muted);">Gadgets and electronic devices</td>
-          <td>4 products</td>
-          <td><span class="badge badge-success">Active</span></td>
-        </tr>
-
-      </tbody>
-    </table>
-  </div>
-</div>
-
 {% endblock %}

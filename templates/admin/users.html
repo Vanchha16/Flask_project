@@ -1,6 +1,75 @@
 {% extends "admin/layout/master.html" %}
-
 {% block title %}Users — VC Shop Admin{% endblock %}
+{% block page_title %}Users{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-text"><h1>Users</h1><p>4 registered accounts</p></div>
+  <a href="{{ url_for('signup') }}" target="_blank" class="btn-primary">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    Add User
+  </a>
+</div>
+<div class="table-card">
+  <div class="table-header"><span class="table-title">All Accounts</span><span class="badge badge-info">4 users</span></div>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>User</th><th>Email</th><th>Role</th><th>Joined</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="table-td">
+            <div style="display:flex;align-items:center;gap:8px">
+              <div class="avatar-sm">JS</div>
+              <span style="color:var(--text);font-weight:500">John Smith</span>
+            </div>
+          </td>
+          <td class="table-td" style="color:var(--text-muted)">john.smith@email.com</td>
+          <td class="table-td"><span class="badge badge-info">Customer</span></td>
+          <td class="table-td" style="color:var(--text-muted)">2026-05-10</td>
+          <td class="table-td"><span class="badge badge-success">Active</span></td>
+        </tr>
+        <tr>
+          <td class="table-td">
+            <div style="display:flex;align-items:center;gap:8px">
+              <div class="avatar-sm" style="background:#EDE9FE;color:#7C3AED">SL</div>
+              <span style="color:var(--text);font-weight:500">Sarah Lee</span>
+            </div>
+          </td>
+          <td class="table-td" style="color:var(--text-muted)">sarah.lee@email.com</td>
+          <td class="table-td"><span class="badge badge-info">Customer</span></td>
+          <td class="table-td" style="color:var(--text-muted)">2026-05-15</td>
+          <td class="table-td"><span class="badge badge-success">Active</span></td>
+        </tr>
+        <tr>
+          <td class="table-td">
+            <div style="display:flex;align-items:center;gap:8px">
+              <div class="avatar-sm" style="background:#D1FAE5;color:#059669">MJ</div>
+              <span style="color:var(--text);font-weight:500">Mike Johnson</span>
+            </div>
+          </td>
+          <td class="table-td" style="color:var(--text-muted)">mike.johnson@email.com</td>
+          <td class="table-td"><span class="badge badge-info">Customer</span></td>
+          <td class="table-td" style="color:var(--text-muted)">2026-04-28</td>
+          <td class="table-td"><span class="badge badge-success">Active</span></td>
+        </tr>
+        <tr>
+          <td class="table-td">
+            <div style="display:flex;align-items:center;gap:8px">
+              <div class="avatar-sm" style="background:var(--accent);color:#fff">AD</div>
+              <span style="color:var(--text);font-weight:500">Admin User</span>
+            </div>
+          </td>
+          <td class="table-td" style="color:var(--text-muted)">admin@vcshop.com</td>
+          <td class="table-td"><span class="badge" style="background:var(--accent-light);color:var(--accent)">Admin</span></td>
+          <td class="table-td" style="color:var(--text-muted)">2026-01-01</td>
+          <td class="table-td"><span class="badge badge-success">Active</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+{# end #}
 {% block topbar_title %}Users{% endblock %}
 {% block topbar_subtitle %}Manage registered user accounts.{% endblock %}
 

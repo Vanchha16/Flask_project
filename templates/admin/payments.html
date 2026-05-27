@@ -1,6 +1,77 @@
 {% extends "admin/layout/master.html" %}
-
 {% block title %}Payments — VC Shop Admin{% endblock %}
+{% block page_title %}Payments{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-text"><h1>Payments</h1><p>4 recent transactions</p></div>
+</div>
+<div class="stats-grid" style="margin-bottom:24px">
+  <div class="stat-card">
+    <div class="stat-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
+    <div class="stat-body"><div class="stat-label">Total Revenue</div><div class="stat-value">$1,617.70</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:#FEF3C7;color:#D97706"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div>
+    <div class="stat-body"><div class="stat-label">Transactions</div><div class="stat-value">4</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:#D1FAE5;color:#059669"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+    <div class="stat-body"><div class="stat-label">Completed</div><div class="stat-value">3</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:#EDE9FE;color:#7C3AED"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
+    <div class="stat-body"><div class="stat-label">Refunded</div><div class="stat-value">1</div></div>
+  </div>
+</div>
+<div class="table-card">
+  <div class="table-header"><span class="table-title">All Transactions</span><span class="badge badge-info">4 records</span></div>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>Payment ID</th><th>Order</th><th>Customer</th><th>Amount</th><th>Method</th><th>Status</th><th>Date</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="table-td"><span class="font-mono text-xs" style="color:var(--accent)">PAY-7821</span></td>
+          <td class="table-td"><span class="font-mono text-xs" style="color:var(--text-muted)">VC-10421</span></td>
+          <td class="table-td" style="color:var(--text)">Sarah Chen</td>
+          <td class="table-td font-semibold" style="color:var(--text)">$445.94</td>
+          <td class="table-td" style="color:var(--text-muted)">Credit Card</td>
+          <td class="table-td"><span class="badge badge-success">Completed</span></td>
+          <td class="table-td" style="color:var(--text-muted)">2026-05-20</td>
+        </tr>
+        <tr>
+          <td class="table-td"><span class="font-mono text-xs" style="color:var(--accent)">PAY-7820</span></td>
+          <td class="table-td"><span class="font-mono text-xs" style="color:var(--text-muted)">VC-10420</span></td>
+          <td class="table-td" style="color:var(--text)">James Wilson</td>
+          <td class="table-td font-semibold" style="color:var(--text)">$695.00</td>
+          <td class="table-td" style="color:var(--text-muted)">PayPal</td>
+          <td class="table-td"><span class="badge badge-success">Completed</span></td>
+          <td class="table-td" style="color:var(--text-muted)">2026-05-20</td>
+        </tr>
+        <tr>
+          <td class="table-td"><span class="font-mono text-xs" style="color:var(--accent)">PAY-7819</span></td>
+          <td class="table-td"><span class="font-mono text-xs" style="color:var(--text-muted)">VC-10419</span></td>
+          <td class="table-td" style="color:var(--text)">Maria Garcia</td>
+          <td class="table-td font-semibold" style="color:var(--text)">$164.49</td>
+          <td class="table-td" style="color:var(--text-muted)">Credit Card</td>
+          <td class="table-td"><span class="badge badge-warn">Pending</span></td>
+          <td class="table-td" style="color:var(--text-muted)">2026-05-19</td>
+        </tr>
+        <tr>
+          <td class="table-td"><span class="font-mono text-xs" style="color:var(--accent)">PAY-7818</span></td>
+          <td class="table-td"><span class="font-mono text-xs" style="color:var(--text-muted)">VC-10418</span></td>
+          <td class="table-td" style="color:var(--text)">Alex Thompson</td>
+          <td class="table-td font-semibold" style="color:var(--text)">$312.27</td>
+          <td class="table-td" style="color:var(--text-muted)">Apple Pay</td>
+          <td class="table-td"><span class="badge badge-danger">Refunded</span></td>
+          <td class="table-td" style="color:var(--text-muted)">2026-05-19</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+{# end #}
 {% block topbar_title %}Payments{% endblock %}
 {% block topbar_subtitle %}Track all payment transactions.{% endblock %}
 

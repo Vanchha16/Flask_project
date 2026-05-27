@@ -1,6 +1,75 @@
 {% extends "admin/layout/master.html" %}
-
 {% block title %}Customers — VC Shop Admin{% endblock %}
+{% block page_title %}Customers{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-text"><h1>Customers</h1><p>4 registered customers</p></div>
+</div>
+<div class="table-card">
+  <div class="table-header"><span class="table-title">All Customers</span><span class="badge badge-info">4 customers</span></div>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>Customer</th><th>Email</th><th>Orders</th><th>Total Spent</th><th>Joined</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="table-td">
+            <div style="display:flex;align-items:center;gap:8px">
+              <div class="avatar-sm" style="background:var(--accent-light);color:var(--accent)">SC</div>
+              <span style="color:var(--text);font-weight:500">Sarah Chen</span>
+            </div>
+          </td>
+          <td class="table-td" style="color:var(--text-muted)">sarah@example.com</td>
+          <td class="table-td" style="color:var(--text-muted)">12</td>
+          <td class="table-td font-semibold" style="color:var(--text)">$2,340.50</td>
+          <td class="table-td" style="color:var(--text-muted)">2025-11-05</td>
+          <td class="table-td"><span class="badge badge-success">Active</span></td>
+        </tr>
+        <tr>
+          <td class="table-td">
+            <div style="display:flex;align-items:center;gap:8px">
+              <div class="avatar-sm" style="background:#EDE9FE;color:#7C3AED">JW</div>
+              <span style="color:var(--text);font-weight:500">James Wilson</span>
+            </div>
+          </td>
+          <td class="table-td" style="color:var(--text-muted)">james@example.com</td>
+          <td class="table-td" style="color:var(--text-muted)">8</td>
+          <td class="table-td font-semibold" style="color:var(--text)">$1,890.00</td>
+          <td class="table-td" style="color:var(--text-muted)">2025-12-10</td>
+          <td class="table-td"><span class="badge badge-success">Active</span></td>
+        </tr>
+        <tr>
+          <td class="table-td">
+            <div style="display:flex;align-items:center;gap:8px">
+              <div class="avatar-sm" style="background:#D1FAE5;color:#059669">MG</div>
+              <span style="color:var(--text);font-weight:500">Maria Garcia</span>
+            </div>
+          </td>
+          <td class="table-td" style="color:var(--text-muted)">maria@example.com</td>
+          <td class="table-td" style="color:var(--text-muted)">15</td>
+          <td class="table-td font-semibold" style="color:var(--text)">$3,120.75</td>
+          <td class="table-td" style="color:var(--text-muted)">2025-09-22</td>
+          <td class="table-td"><span class="badge badge-success">Active</span></td>
+        </tr>
+        <tr>
+          <td class="table-td">
+            <div style="display:flex;align-items:center;gap:8px">
+              <div class="avatar-sm" style="background:#FEF3C7;color:#D97706">DL</div>
+              <span style="color:var(--text);font-weight:500">David Lee</span>
+            </div>
+          </td>
+          <td class="table-td" style="color:var(--text-muted)">david@example.com</td>
+          <td class="table-td" style="color:var(--text-muted)">2</td>
+          <td class="table-td font-semibold" style="color:var(--text)">$289.98</td>
+          <td class="table-td" style="color:var(--text-muted)">2026-03-20</td>
+          <td class="table-td"><span class="badge badge-warn">Inactive</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+{# end #}
 {% block topbar_title %}Customers{% endblock %}
 {% block topbar_subtitle %}View and manage your customers.{% endblock %}
 

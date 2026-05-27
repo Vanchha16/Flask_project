@@ -1,110 +1,111 @@
 {% extends "admin/layout/master.html" %}
-
 {% block title %}Products — VC Shop Admin{% endblock %}
-{% block topbar_title %}Products{% endblock %}
-{% block topbar_subtitle %}Manage your product catalog.{% endblock %}
+{% block page_title %}Products{% endblock %}
 
 {% block content %}
-
 <div class="page-header">
   <div class="page-header-text">
     <h1>Products</h1>
     <p>4 products in catalog</p>
   </div>
-  <a href="#" class="btn btn-primary">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-    </svg>
+  <button class="btn-primary" onclick="openAddProduct()">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
     Add Product
-  </a>
+  </button>
 </div>
 
-<div class="card">
+<div class="table-card">
+  <div class="table-header">
+    <span class="table-title">All Products</span>
+    <span class="badge badge-info">4 products</span>
+  </div>
   <div class="table-wrap">
-    <table>
+    <table class="data-table" id="products-table">
       <thead>
         <tr>
           <th>Product</th>
+          <th>SKU</th>
           <th>Category</th>
           <th>Price</th>
           <th>Stock</th>
-          <th>SKU</th>
           <th>Status</th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody>
-
         <tr>
-          <td>
-            <div class="user-cell">
-              <div class="avatar" style="border-radius:8px;">JK</div>
-              <div>
-                <div class="cell-name">Classic Men's Jacket</div>
-                <div class="cell-sub">Slim fit, all season</div>
-              </div>
+          <td class="table-td font-medium" style="color:var(--text)">Classic Men's Jacket</td>
+          <td class="table-td"><span class="font-mono text-xs" style="color:var(--text-muted)">MC-001</span></td>
+          <td class="table-td" style="color:var(--text-muted)">Men's</td>
+          <td class="table-td font-semibold" style="color:var(--text)">$89.99</td>
+          <td class="table-td" style="color:var(--text-muted)">24</td>
+          <td class="table-td"><span class="badge badge-success">Active</span></td>
+          <td class="table-td">
+            <div style="display:flex;gap:6px">
+              <button class="btn-secondary" style="padding:4px 10px;font-size:12px" onclick="showToast('Edit opened')">Edit</button>
+              <button class="btn-secondary" style="padding:4px 10px;font-size:12px;color:#E8553D" onclick="confirmDelete(&#34;Classic Men&#39;s Jacket&#34;, function(){ showToast('Deleted','error'); })">Delete</button>
             </div>
           </td>
-          <td><span class="badge badge-purple">Men's Clothing</span></td>
-          <td><strong>$89.99</strong></td>
-          <td>24</td>
-          <td style="color:var(--text-muted);font-size:12px;">MC-001</td>
-          <td><span class="badge badge-success">In Stock</span></td>
         </tr>
-
         <tr>
-          <td>
-            <div class="user-cell">
-              <div class="avatar" style="border-radius:8px;background:#FFF8E1;color:#F57F17;">GR</div>
-              <div>
-                <div class="cell-name">Gold Ring</div>
-                <div class="cell-sub">18K gold plated</div>
-              </div>
+          <td class="table-td font-medium" style="color:var(--text)">Gold Ring</td>
+          <td class="table-td"><span class="font-mono text-xs" style="color:var(--text-muted)">JW-001</span></td>
+          <td class="table-td" style="color:var(--text-muted)">Jewelry</td>
+          <td class="table-td font-semibold" style="color:var(--text)">$45.00</td>
+          <td class="table-td" style="color:var(--text-muted)">15</td>
+          <td class="table-td"><span class="badge badge-success">Active</span></td>
+          <td class="table-td">
+            <div style="display:flex;gap:6px">
+              <button class="btn-secondary" style="padding:4px 10px;font-size:12px" onclick="showToast('Edit opened')">Edit</button>
+              <button class="btn-secondary" style="padding:4px 10px;font-size:12px;color:#E8553D" onclick="confirmDelete('Gold Ring', function(){ showToast('Deleted','error'); })">Delete</button>
             </div>
           </td>
-          <td><span class="badge badge-warning">Jewelry</span></td>
-          <td><strong>$45.00</strong></td>
-          <td>15</td>
-          <td style="color:var(--text-muted);font-size:12px;">JW-001</td>
-          <td><span class="badge badge-success">In Stock</span></td>
         </tr>
-
         <tr>
-          <td>
-            <div class="user-cell">
-              <div class="avatar" style="border-radius:8px;background:#FCE4EC;color:#C62828;">WD</div>
-              <div>
-                <div class="cell-name">Women's Summer Dress</div>
-                <div class="cell-sub">Light floral print</div>
-              </div>
+          <td class="table-td font-medium" style="color:var(--text)">Women's Summer Dress</td>
+          <td class="table-td"><span class="font-mono text-xs" style="color:var(--text-muted)">WC-001</span></td>
+          <td class="table-td" style="color:var(--text-muted)">Women's</td>
+          <td class="table-td font-semibold" style="color:var(--text)">$65.00</td>
+          <td class="table-td" style="color:#D97706;font-weight:600">3</td>
+          <td class="table-td"><span class="badge badge-warn">Low Stock</span></td>
+          <td class="table-td">
+            <div style="display:flex;gap:6px">
+              <button class="btn-secondary" style="padding:4px 10px;font-size:12px" onclick="showToast('Edit opened')">Edit</button>
+              <button class="btn-secondary" style="padding:4px 10px;font-size:12px;color:#E8553D" onclick="confirmDelete(&#34;Women&#39;s Summer Dress&#34;, function(){ showToast('Deleted','error'); })">Delete</button>
             </div>
           </td>
-          <td><span class="badge badge-info">Women's Clothing</span></td>
-          <td><strong>$65.00</strong></td>
-          <td>3</td>
-          <td style="color:var(--text-muted);font-size:12px;">WC-001</td>
-          <td><span class="badge badge-warning">Low Stock</span></td>
         </tr>
-
         <tr>
-          <td>
-            <div class="user-cell">
-              <div class="avatar" style="border-radius:8px;background:#E3F2FD;color:#1565C0;">WE</div>
-              <div>
-                <div class="cell-name">Wireless Earbuds</div>
-                <div class="cell-sub">Noise cancelling, BT 5.0</div>
-              </div>
+          <td class="table-td font-medium" style="color:var(--text)">Wireless Earbuds</td>
+          <td class="table-td"><span class="font-mono text-xs" style="color:var(--text-muted)">EL-001</span></td>
+          <td class="table-td" style="color:var(--text-muted)">Electronics</td>
+          <td class="table-td font-semibold" style="color:var(--text)">$120.00</td>
+          <td class="table-td" style="color:var(--text-muted)">10</td>
+          <td class="table-td"><span class="badge badge-success">Active</span></td>
+          <td class="table-td">
+            <div style="display:flex;gap:6px">
+              <button class="btn-secondary" style="padding:4px 10px;font-size:12px" onclick="showToast('Edit opened')">Edit</button>
+              <button class="btn-secondary" style="padding:4px 10px;font-size:12px;color:#E8553D" onclick="confirmDelete('Wireless Earbuds', function(){ showToast('Deleted','error'); })">Delete</button>
             </div>
           </td>
-          <td><span class="badge badge-gray">Electronics</span></td>
-          <td><strong>$120.00</strong></td>
-          <td>10</td>
-          <td style="color:var(--text-muted);font-size:12px;">EL-001</td>
-          <td><span class="badge badge-success">In Stock</span></td>
         </tr>
-
       </tbody>
     </table>
   </div>
 </div>
+{% endblock %}
 
+{% block extra_scripts %}
+<script>
+function openAddProduct() {
+  var body = '<div class="form-group"><label>Product Name</label><input type="text" class="form-input" placeholder="e.g. Canvas Backpack"></div>'
+    + '<div class="form-row"><div class="form-group"><label>Price ($)</label><input type="number" step="0.01" class="form-input" placeholder="0.00"></div>'
+    + '<div class="form-group"><label>Stock</label><input type="number" class="form-input" placeholder="0"></div></div>'
+    + '<div class="form-row"><div class="form-group"><label>Category</label><select class="form-input"><option>Men\'s</option><option>Women\'s</option><option>Jewelry</option><option>Electronics</option></select></div>'
+    + '<div class="form-group"><label>SKU</label><input type="text" class="form-input" placeholder="VC-XX-000"></div></div>'
+    + '<div class="modal-actions"><button class="btn-secondary" onclick="closeModal()">Cancel</button>'
+    + '<button class="btn-primary" onclick="closeModal();showToast(\'Product added\')">Add Product</button></div>';
+  openModal('Add Product', body);
+}
+</script>
 {% endblock %}

@@ -1,0 +1,65 @@
+{% extends "admin/layout/master.html" %}
+{% block title %}Reviews — VC Shop Admin{% endblock %}
+{% block page_title %}Reviews{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-text"><h1>Reviews</h1><p>4 customer reviews</p></div>
+</div>
+<div class="table-card">
+  <div class="table-header"><span class="table-title">All Reviews</span><span class="badge badge-info">4 reviews</span></div>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>Product</th><th>Customer</th><th>Rating</th><th>Comment</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="table-td font-medium" style="color:var(--text)">Canvas Backpack</td>
+          <td class="table-td" style="color:var(--text-muted)">Sarah Chen</td>
+          <td class="table-td" style="color:#F5A623;font-weight:600">★★★★★</td>
+          <td class="table-td" style="color:var(--text-muted);max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Absolutely love this backpack!</td>
+          <td class="table-td" style="color:var(--text-muted)">2026-05-18</td>
+          <td class="table-td"><span class="badge badge-success">Approved</span></td>
+          <td class="table-td"><button class="btn-secondary" style="padding:4px 10px;font-size:12px;color:#E8553D" onclick="confirmDelete('this review', function(){ showToast('Review removed','error'); })">Remove</button></td>
+        </tr>
+        <tr>
+          <td class="table-td font-medium" style="color:var(--text)">Diamond Ring</td>
+          <td class="table-td" style="color:var(--text-muted)">James Wilson</td>
+          <td class="table-td" style="color:#F5A623;font-weight:600">★★★★★</td>
+          <td class="table-td" style="color:var(--text-muted);max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Stunning ring, my partner was thrilled.</td>
+          <td class="table-td" style="color:var(--text-muted)">2026-05-17</td>
+          <td class="table-td"><span class="badge badge-success">Approved</span></td>
+          <td class="table-td"><button class="btn-secondary" style="padding:4px 10px;font-size:12px;color:#E8553D" onclick="confirmDelete('this review', function(){ showToast('Review removed','error'); })">Remove</button></td>
+        </tr>
+        <tr>
+          <td class="table-td font-medium" style="color:var(--text)">Smart Watch</td>
+          <td class="table-td" style="color:var(--text-muted)">Emily Brown</td>
+          <td class="table-td" style="color:#F5A623;font-weight:600">★★★</td>
+          <td class="table-td" style="color:var(--text-muted);max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Decent watch but the app is buggy.</td>
+          <td class="table-td" style="color:var(--text-muted)">2026-05-15</td>
+          <td class="table-td"><span class="badge badge-warn">Pending</span></td>
+          <td class="table-td">
+            <div style="display:flex;gap:6px">
+              <button class="btn-secondary" style="padding:4px 10px;font-size:12px" onclick="showToast('Review approved')">Approve</button>
+              <button class="btn-secondary" style="padding:4px 10px;font-size:12px;color:#E8553D" onclick="confirmDelete('this review', function(){ showToast('Review removed','error'); })">Remove</button>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td class="table-td font-medium" style="color:var(--text)">USB-C Hub</td>
+          <td class="table-td" style="color:var(--text-muted)">Tom Harris</td>
+          <td class="table-td" style="color:#F5A623;font-weight:600">★</td>
+          <td class="table-td" style="color:var(--text-muted);max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Stopped working after 2 days.</td>
+          <td class="table-td" style="color:var(--text-muted)">2026-05-11</td>
+          <td class="table-td"><span class="badge badge-danger">Flagged</span></td>
+          <td class="table-td">
+            <div style="display:flex;gap:6px">
+              <button class="btn-secondary" style="padding:4px 10px;font-size:12px" onclick="showToast('Review approved')">Approve</button>
+              <button class="btn-secondary" style="padding:4px 10px;font-size:12px;color:#E8553D" onclick="confirmDelete('this review', function(){ showToast('Review removed','error'); })">Remove</button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

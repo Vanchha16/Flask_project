@@ -910,6 +910,17 @@ html.dark .badge-refunded {
   color: #A78BFA;
 }
 
+/* ── Shorthand badge aliases (used in server-side templates) ── */
+.badge-success { background: #E8F8F1; color: #0D9668; }
+.badge-warn    { background: #FFF6E5; color: #B8860B; }
+.badge-info    { background: #E8F0FE; color: #2563EB; }
+.badge-danger  { background: #FDECEB; color: #D32F2F; }
+
+html.dark .badge-success { background: #0D3D28; color: #34D399; }
+html.dark .badge-warn    { background: #3A2A00; color: #F5A623; }
+html.dark .badge-info    { background: #1A2A4A; color: #60A5FA; }
+html.dark .badge-danger  { background: #3D1A1A; color: #F87171; }
+
 /* ── Stock ── */
 .stock-out {
   color: #D32F2F;
