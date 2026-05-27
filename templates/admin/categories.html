@@ -1,0 +1,73 @@
+{% extends "admin/layout/master.html" %}
+
+{% block title %}Categories — VC Shop Admin{% endblock %}
+{% block topbar_title %}Categories{% endblock %}
+{% block topbar_subtitle %}Manage your product categories.{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+  <div class="page-header-text">
+    <h1>Categories</h1>
+    <p>4 active categories</p>
+  </div>
+  <a href="#" class="btn btn-primary">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+    </svg>
+    Add Category
+  </a>
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Category Name</th>
+          <th>Description</th>
+          <th>Products</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <tr>
+          <td style="color:var(--text-muted);">01</td>
+          <td><strong>Men's Clothing</strong></td>
+          <td style="color:var(--text-muted);">Men's apparel and accessories</td>
+          <td>5 products</td>
+          <td><span class="badge badge-success">Active</span></td>
+        </tr>
+
+        <tr>
+          <td style="color:var(--text-muted);">02</td>
+          <td><strong>Women's Clothing</strong></td>
+          <td style="color:var(--text-muted);">Women's fashion and clothing</td>
+          <td>8 products</td>
+          <td><span class="badge badge-success">Active</span></td>
+        </tr>
+
+        <tr>
+          <td style="color:var(--text-muted);">03</td>
+          <td><strong>Jewelry</strong></td>
+          <td style="color:var(--text-muted);">Rings, bracelets, earrings and necklaces</td>
+          <td>4 products</td>
+          <td><span class="badge badge-success">Active</span></td>
+        </tr>
+
+        <tr>
+          <td style="color:var(--text-muted);">04</td>
+          <td><strong>Electronics</strong></td>
+          <td style="color:var(--text-muted);">Gadgets and electronic devices</td>
+          <td>4 products</td>
+          <td><span class="badge badge-success">Active</span></td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

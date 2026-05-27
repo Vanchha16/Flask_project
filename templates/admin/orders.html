@@ -1,0 +1,92 @@
+{% extends "admin/layout/master.html" %}
+
+{% block title %}Orders — VC Shop Admin{% endblock %}
+{% block topbar_title %}Orders{% endblock %}
+{% block topbar_subtitle %}Track and manage customer orders.{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+  <div class="page-header-text">
+    <h1>Orders</h1>
+    <p>4 orders this month</p>
+  </div>
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Customer</th>
+          <th>Item</th>
+          <th>Total</th>
+          <th>Date</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <tr>
+          <td style="font-weight:600;color:var(--primary);">#ORD-001</td>
+          <td>
+            <div class="user-cell">
+              <div class="avatar">JS</div>
+              <span class="cell-name">John Smith</span>
+            </div>
+          </td>
+          <td>Classic Men's Jacket</td>
+          <td><strong>$89.99</strong></td>
+          <td style="color:var(--text-muted);">May 20, 2026</td>
+          <td><span class="badge badge-success">Delivered</span></td>
+        </tr>
+
+        <tr>
+          <td style="font-weight:600;color:var(--primary);">#ORD-002</td>
+          <td>
+            <div class="user-cell">
+              <div class="avatar">SL</div>
+              <span class="cell-name">Sarah Lee</span>
+            </div>
+          </td>
+          <td>Gold Ring</td>
+          <td><strong>$45.00</strong></td>
+          <td style="color:var(--text-muted);">May 22, 2026</td>
+          <td><span class="badge badge-warning">Processing</span></td>
+        </tr>
+
+        <tr>
+          <td style="font-weight:600;color:var(--primary);">#ORD-003</td>
+          <td>
+            <div class="user-cell">
+              <div class="avatar">MJ</div>
+              <span class="cell-name">Mike Johnson</span>
+            </div>
+          </td>
+          <td>Women's Summer Dress × 2</td>
+          <td><strong>$130.00</strong></td>
+          <td style="color:var(--text-muted);">May 24, 2026</td>
+          <td><span class="badge badge-info">Shipped</span></td>
+        </tr>
+
+        <tr>
+          <td style="font-weight:600;color:var(--primary);">#ORD-004</td>
+          <td>
+            <div class="user-cell">
+              <div class="avatar">ED</div>
+              <span class="cell-name">Emma Davis</span>
+            </div>
+          </td>
+          <td>Wireless Earbuds</td>
+          <td><strong>$120.00</strong></td>
+          <td style="color:var(--text-muted);">May 25, 2026</td>
+          <td><span class="badge badge-danger">Cancelled</span></td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}
