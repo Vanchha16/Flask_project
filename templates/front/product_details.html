@@ -34,19 +34,4 @@
 </div>
 {% endblock %}
 {% block scripts %}
-<script>
-let qty=1;
-function changeQty(d){qty=Math.max(1,qty+d);document.getElementById('detail-qty').textContent=qty;}
-function addDetailToCart(){
-    const cart=JSON.parse(localStorage.getItem('cart')||'[]');
-    const id='{{ pro_id }}';
-    const existing=cart.find(i=>i.id===id);
-    if(existing){existing.qty+=qty;}
-    else{cart.push({id,title:'{{ title }}',price:{{ price }},image:'{{ image }}',category:'{{ category }}',qty});}
-    localStorage.setItem('cart',JSON.stringify(cart));
-    document.getElementById('cart-count-badge').textContent=cart.reduce((s,i)=>s+i.qty,0);
-    const btn=event.target;btn.textContent='✓ Added!';btn.style.background='#2a9d5c';
-    setTimeout(()=>{btn.textContent='Add to Cart';btn.style.background='';},1500);
-}
-</script>
 {% endblock %}
