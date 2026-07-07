@@ -1,0 +1,201 @@
+{% extends "admin/layout/master.html" %}
+
+{% block title %}Dashboard — VC Shop Admin{% endblock %}
+{% block topbar_title %}Dashboard{% endblock %}
+{% block topbar_subtitle %}Welcome back — here's what's happening today.{% endblock %}
+
+{% block content %}
+
+<!-- Stats Grid -->
+<div class="stats-grid">
+
+  <div class="stat-card">
+    <div class="stat-top">
+      <div class="stat-icon purple">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <span class="stat-change up">+12%</span>
+    </div>
+    <div class="stat-value">$12,450</div>
+    <div class="stat-label">Total Revenue</div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-top">
+      <div class="stat-icon green">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+        </svg>
+      </div>
+      <span class="stat-change up">+8%</span>
+    </div>
+    <div class="stat-value">48</div>
+    <div class="stat-label">Total Orders</div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-top">
+      <div class="stat-icon yellow">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z" />
+        </svg>
+      </div>
+      <span class="stat-change down">-2%</span>
+    </div>
+    <div class="stat-value">20</div>
+    <div class="stat-label">Total Products</div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-top">
+      <div class="stat-icon blue">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+        </svg>
+      </div>
+      <span class="stat-change up">+18%</span>
+    </div>
+    <div class="stat-value">35</div>
+    <div class="stat-label">Total Customers</div>
+  </div>
+
+</div>
+
+<!-- Dashboard Grid -->
+<div class="dash-grid">
+
+  <!-- Recent Orders -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Recent Orders</span>
+      <a href="{{ url_for('admin.orders') }}" class="btn btn-outline" style="font-size:12px;padding:5px 12px;">View all</a>
+    </div>
+
+    <div class="recent-row">
+      <div class="user-cell">
+        <div class="avatar">JS</div>
+        <div>
+          <div class="cell-name">John Smith</div>
+          <div class="cell-sub">#ORD-001 · Classic Men's Jacket</div>
+        </div>
+      </div>
+      <div style="text-align:right;">
+        <div class="cell-name">$89.99</div>
+        <span class="badge badge-success" style="margin-top:4px;">Delivered</span>
+      </div>
+    </div>
+
+    <div class="recent-row">
+      <div class="user-cell">
+        <div class="avatar">SL</div>
+        <div>
+          <div class="cell-name">Sarah Lee</div>
+          <div class="cell-sub">#ORD-002 · Gold Ring</div>
+        </div>
+      </div>
+      <div style="text-align:right;">
+        <div class="cell-name">$45.00</div>
+        <span class="badge badge-warning" style="margin-top:4px;">Processing</span>
+      </div>
+    </div>
+
+    <div class="recent-row">
+      <div class="user-cell">
+        <div class="avatar">MJ</div>
+        <div>
+          <div class="cell-name">Mike Johnson</div>
+          <div class="cell-sub">#ORD-003 · Women's Summer Dress</div>
+        </div>
+      </div>
+      <div style="text-align:right;">
+        <div class="cell-name">$65.00</div>
+        <span class="badge badge-info" style="margin-top:4px;">Shipped</span>
+      </div>
+    </div>
+
+    <div class="recent-row">
+      <div class="user-cell">
+        <div class="avatar">ED</div>
+        <div>
+          <div class="cell-name">Emma Davis</div>
+          <div class="cell-sub">#ORD-004 · Wireless Earbuds</div>
+        </div>
+      </div>
+      <div style="text-align:right;">
+        <div class="cell-name">$120.00</div>
+        <span class="badge badge-danger" style="margin-top:4px;">Cancelled</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Top Products -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Top Products</span>
+      <a href="{{ url_for('admin.products') }}" class="btn btn-outline" style="font-size:12px;padding:5px 12px;">View all</a>
+    </div>
+
+    <div class="recent-row">
+      <div class="user-cell">
+        <div class="avatar" style="border-radius:8px;background:#FFF3E0;color:#E65100;">1</div>
+        <div>
+          <div class="cell-name">Classic Men's Jacket</div>
+          <div class="cell-sub">Men's Clothing</div>
+        </div>
+      </div>
+      <div style="text-align:right;">
+        <div class="cell-name">$89.99</div>
+        <div class="cell-sub">12 sold</div>
+      </div>
+    </div>
+
+    <div class="recent-row">
+      <div class="user-cell">
+        <div class="avatar" style="border-radius:8px;background:#F3E5F5;color:#7B1FA2;">2</div>
+        <div>
+          <div class="cell-name">Gold Ring</div>
+          <div class="cell-sub">Jewelry</div>
+        </div>
+      </div>
+      <div style="text-align:right;">
+        <div class="cell-name">$45.00</div>
+        <div class="cell-sub">8 sold</div>
+      </div>
+    </div>
+
+    <div class="recent-row">
+      <div class="user-cell">
+        <div class="avatar" style="border-radius:8px;background:#E8F5E9;color:#2E7D32;">3</div>
+        <div>
+          <div class="cell-name">Women's Summer Dress</div>
+          <div class="cell-sub">Women's Clothing</div>
+        </div>
+      </div>
+      <div style="text-align:right;">
+        <div class="cell-name">$65.00</div>
+        <div class="cell-sub">7 sold</div>
+      </div>
+    </div>
+
+    <div class="recent-row">
+      <div class="user-cell">
+        <div class="avatar" style="border-radius:8px;background:#E3F2FD;color:#1565C0;">4</div>
+        <div>
+          <div class="cell-name">Wireless Earbuds</div>
+          <div class="cell-sub">Electronics</div>
+        </div>
+      </div>
+      <div style="text-align:right;">
+        <div class="cell-name">$120.00</div>
+        <div class="cell-sub">5 sold</div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+{% endblock %}

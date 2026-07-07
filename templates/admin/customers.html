@@ -1,0 +1,87 @@
+{% extends "admin/layout/master.html" %}
+
+{% block title %}Customers — VC Shop Admin{% endblock %}
+{% block topbar_title %}Customers{% endblock %}
+{% block topbar_subtitle %}View and manage your customers.{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+  <div class="page-header-text">
+    <h1>Customers</h1>
+    <p>4 registered customers</p>
+  </div>
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Customer</th>
+          <th>Email</th>
+          <th>Orders</th>
+          <th>Joined</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <tr>
+          <td>
+            <div class="user-cell">
+              <div class="avatar">JS</div>
+              <span class="cell-name">John Smith</span>
+            </div>
+          </td>
+          <td style="color:var(--text-muted);">john.smith@email.com</td>
+          <td>5 orders</td>
+          <td style="color:var(--text-muted);">May 10, 2026</td>
+          <td><span class="badge badge-success">Active</span></td>
+        </tr>
+
+        <tr>
+          <td>
+            <div class="user-cell">
+              <div class="avatar">SL</div>
+              <span class="cell-name">Sarah Lee</span>
+            </div>
+          </td>
+          <td style="color:var(--text-muted);">sarah.lee@email.com</td>
+          <td>3 orders</td>
+          <td style="color:var(--text-muted);">May 15, 2026</td>
+          <td><span class="badge badge-success">Active</span></td>
+        </tr>
+
+        <tr>
+          <td>
+            <div class="user-cell">
+              <div class="avatar">MJ</div>
+              <span class="cell-name">Mike Johnson</span>
+            </div>
+          </td>
+          <td style="color:var(--text-muted);">mike.johnson@email.com</td>
+          <td>8 orders</td>
+          <td style="color:var(--text-muted);">Apr 28, 2026</td>
+          <td><span class="badge badge-success">Active</span></td>
+        </tr>
+
+        <tr>
+          <td>
+            <div class="user-cell">
+              <div class="avatar">ED</div>
+              <span class="cell-name">Emma Davis</span>
+            </div>
+          </td>
+          <td style="color:var(--text-muted);">emma.davis@email.com</td>
+          <td>2 orders</td>
+          <td style="color:var(--text-muted);">May 20, 2026</td>
+          <td><span class="badge badge-gray">Inactive</span></td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}
