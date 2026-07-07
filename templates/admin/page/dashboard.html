@@ -1,0 +1,172 @@
+{% extends "admin/master.html" %}
+
+{% block title %}Dashboard — VC Shop{% endblock %}
+{% block page_title %}Overview{% endblock %}
+
+{% block content %}
+
+<!-- ══ Stat Cards ══ -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+
+  <div class="rounded-xl p-4 border" style="background:var(--card-bg);border-color:var(--border)">
+    <div class="flex items-center justify-between">
+      <div>
+        <div class="text-xs font-medium" style="color:var(--text-muted)">Total Revenue</div>
+        <div class="text-2xl font-bold mt-1" style="font-family:var(--heading);color:var(--text)">${{ stats.revenue if stats else "12,480.00" }}</div>
+      </div>
+      <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background:var(--accent-light)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+      </div>
+    </div>
+    <div class="text-xs mt-2 font-medium" style="color:#16a34a">+12.4% from last month</div>
+  </div>
+
+  <div class="rounded-xl p-4 border" style="background:var(--card-bg);border-color:var(--border)">
+    <div class="flex items-center justify-between">
+      <div>
+        <div class="text-xs font-medium" style="color:var(--text-muted)">Orders</div>
+        <div class="text-2xl font-bold mt-1" style="font-family:var(--heading);color:var(--text)">{{ stats.orders if stats else 342 }}</div>
+      </div>
+      <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background:#dbeafe">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+      </div>
+    </div>
+    <div class="text-xs mt-2 font-medium" style="color:#16a34a">+8.1% from last month</div>
+  </div>
+
+  <div class="rounded-xl p-4 border" style="background:var(--card-bg);border-color:var(--border)">
+    <div class="flex items-center justify-between">
+      <div>
+        <div class="text-xs font-medium" style="color:var(--text-muted)">New Customers</div>
+        <div class="text-2xl font-bold mt-1" style="font-family:var(--heading);color:var(--text)">{{ stats.new_customers if stats else 57 }}</div>
+      </div>
+      <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background:#fef3c7">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="17" y1="11" x2="23" y2="11"/></svg>
+      </div>
+    </div>
+    <div class="text-xs mt-2 font-medium" style="color:#dc2626">-2.3% from last month</div>
+  </div>
+
+  <div class="rounded-xl p-4 border" style="background:var(--card-bg);border-color:var(--border)">
+    <div class="flex items-center justify-between">
+      <div>
+        <div class="text-xs font-medium" style="color:var(--text-muted)">Pending Orders</div>
+        <div class="text-2xl font-bold mt-1" style="font-family:var(--heading);color:var(--text)">{{ stats.pending_orders if stats else 9 }}</div>
+      </div>
+      <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background:#fee2e2">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+    </div>
+    <div class="text-xs mt-2 font-medium" style="color:var(--text-muted)">Needs attention</div>
+  </div>
+
+</div>
+
+<!-- ══ Chart + Recent Orders ══ -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+
+  <!-- Revenue chart -->
+  <div class="rounded-xl p-4 border lg:col-span-2" style="background:var(--card-bg);border-color:var(--border)">
+    <div class="flex items-center justify-between mb-3">
+      <span class="font-semibold text-sm" style="font-family:var(--heading);color:var(--text)">Revenue (Last 7 Days)</span>
+    </div>
+    <canvas id="revenueChart" height="140"></canvas>
+  </div>
+
+  <!-- Top products -->
+  <div class="rounded-xl p-4 border" style="background:var(--card-bg);border-color:var(--border)">
+    <div class="flex items-center justify-between mb-3">
+      <span class="font-semibold text-sm" style="font-family:var(--heading);color:var(--text)">Top Products</span>
+    </div>
+    <div class="space-y-3">
+      {% for item in (top_products if top_products else [
+        {"name": "Naruto Uzumaki Figure", "sold": 48},
+        {"name": "Anime Hoodie — Black", "sold": 35},
+        {"name": "Chibi Keychain Set", "sold": 29}
+      ]) %}
+      <div class="flex items-center justify-between">
+        <span class="text-sm" style="color:var(--text)">{{ item.name }}</span>
+        <span class="text-xs font-semibold px-2 py-0.5 rounded-full" style="background:var(--accent-light);color:var(--accent)">{{ item.sold }} sold</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+
+<!-- ══ Recent Orders Table ══ -->
+<div class="rounded-xl border overflow-hidden" style="background:var(--card-bg);border-color:var(--border)">
+{#  <div class="flex items-center justify-between px-4 py-3" style="border-bottom:1px solid var(--border)">#}
+{#    <span class="font-semibold text-sm" style="font-family:var(--heading);color:var(--text)">Recent Orders</span>#}
+{#    <a href="{{ url_for('admin.orders') if 'admin.orders' else '#' }}" class="text-xs font-semibold" style="color:var(--accent)">View all →</a>#}
+{#  </div>#}
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead>
+        <tr style="border-bottom:1px solid var(--border)">
+          <th class="text-left font-semibold px-4 py-3" style="color:var(--text-muted)">Order</th>
+          <th class="text-left font-semibold px-4 py-3" style="color:var(--text-muted)">Customer</th>
+          <th class="text-left font-semibold px-4 py-3" style="color:var(--text-muted)">Date</th>
+          <th class="text-left font-semibold px-4 py-3" style="color:var(--text-muted)">Total</th>
+          <th class="text-left font-semibold px-4 py-3" style="color:var(--text-muted)">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for order in recent_orders %}
+        <tr style="border-bottom:1px solid var(--border)">
+          <td class="px-4 py-3 font-medium" style="color:var(--text)">#{{ order.id }}</td>
+          <td class="px-4 py-3" style="color:var(--text)">{{ order.customer_name }}</td>
+          <td class="px-4 py-3" style="color:var(--text-muted)">{{ order.created_at }}</td>
+          <td class="px-4 py-3 font-medium" style="color:var(--text)">${{ "%.2f"|format(order.total) }}</td>
+          <td class="px-4 py-3">
+            {% if order.status == 'completed' %}
+              <span class="text-xs font-semibold px-2 py-1 rounded-full" style="background:#dcfce7;color:#16a34a">Completed</span>
+            {% elif order.status == 'pending' %}
+              <span class="text-xs font-semibold px-2 py-1 rounded-full" style="background:#fef3c7;color:#d97706">Pending</span>
+            {% elif order.status == 'cancelled' %}
+              <span class="text-xs font-semibold px-2 py-1 rounded-full" style="background:#fee2e2;color:#dc2626">Cancelled</span>
+            {% else %}
+              <span class="text-xs font-semibold px-2 py-1 rounded-full" style="background:var(--hover-bg);color:var(--text-muted)">{{ order.status }}</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="5" class="px-4 py-10 text-center" style="color:var(--text-muted)">No orders yet.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  const ctx = document.getElementById('revenueChart');
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: {{ chart_labels | tojson if chart_labels else ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"] | tojson }},
+      datasets: [{
+        label: 'Revenue',
+        data: {{ chart_data | tojson if chart_data else [1200, 1900, 1500, 2100, 1800, 2600, 2300] | tojson }},
+        borderColor: '#7c3aed',
+        backgroundColor: 'rgba(124,58,237,0.08)',
+        tension: 0.35,
+        fill: true,
+        pointRadius: 3
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+</script>
+{% endblock %}

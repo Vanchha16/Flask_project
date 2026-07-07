@@ -1,4 +1,4 @@
-{% extends "front/layout/master.html" %}
+﻿{% extends "front/layout/master.html" %}
 {% block title %}VC Shop — Find Your Perfect Style{% endblock %}
 {% block content %}
 
@@ -11,8 +11,8 @@
                 <h1>Find Your<br>Perfect Style</h1>
                 <p>Curated products across categories, handpicked for quality and design. From everyday essentials to statement pieces.</p>
                 <div class="hero-actions">
-                    <a href="{{ url_for('shop') }}" class="btn btn-accent">Shop Now <i class="fa-solid fa-arrow-right" style="font-size:12px"></i></a>
-                    <a href="{{ url_for('cart') }}" class="btn btn-outline">View Cart</a>
+                    <a href="{{ url_for('front.shop') }}" class="btn btn-accent">Shop Now <i class="fa-solid fa-arrow-right" style="font-size:12px"></i></a>
+                    <a href="{{ url_for('front.cart') }}" class="btn btn-outline">View Cart</a>
                 </div>
             </div>
             <div class="hero-visual">
@@ -32,19 +32,19 @@
     <div class="container">
         <div class="section-head">
             <h2>Shop by Category</h2>
-            <a href="{{ url_for('shop') }}" class="section-more">View all <i class="fa-solid fa-arrow-right" style="font-size:11px"></i></a>
+            <a href="{{ url_for('front.shop') }}" class="section-more">View all <i class="fa-solid fa-arrow-right" style="font-size:11px"></i></a>
         </div>
         <div class="cat-grid">
-            <a href="{{ url_for('shop') }}?category=men's clothing" class="cat-card" style="background:#E0D8D0">
+            <a href="{{ url_for('front.shop') }}?category=men's clothing" class="cat-card" style="background:#E0D8D0">
                 <h3>Men's</h3><span>Clothing</span>
             </a>
-            <a href="{{ url_for('shop') }}?category=women's clothing" class="cat-card" style="background:#ECD0D8">
+            <a href="{{ url_for('front.shop') }}?category=women's clothing" class="cat-card" style="background:#ECD0D8">
                 <h3>Women's</h3><span>Fashion</span>
             </a>
-            <a href="{{ url_for('shop') }}?category=jewelery" class="cat-card" style="background:#EDE4D0">
+            <a href="{{ url_for('front.shop') }}?category=jewelery" class="cat-card" style="background:#EDE4D0">
                 <h3>Jewelry</h3><span>Accessories</span>
             </a>
-            <a href="{{ url_for('shop') }}?category=electronics" class="cat-card" style="background:#D0D8E8">
+            <a href="{{ url_for('front.shop') }}?category=electronics" class="cat-card" style="background:#D0D8E8">
                 <h3>Electronics</h3><span>Gadgets</span>
             </a>
         </div>
@@ -56,7 +56,7 @@
     <div class="container">
         <div class="section-head">
             <h2>Featured Products</h2>
-            <a href="{{ url_for('shop') }}" class="section-more">See all {{ product|length }} items <i class="fa-solid fa-arrow-right" style="font-size:11px"></i></a>
+            <a href="{{ url_for('front.shop') }}" class="section-more">See all {{ product|length }} items <i class="fa-solid fa-arrow-right" style="font-size:11px"></i></a>
         </div>
         <div class="product-grid">
             {% for item in product[:4] %}
@@ -160,7 +160,7 @@
         <div style="background:linear-gradient(135deg,#111 0%,#333 100%);border-radius:var(--radius);padding:56px;text-align:center;color:#fff">
             <h2 style="font-family:var(--heading);font-size:clamp(24px,3vw,36px);font-weight:700;letter-spacing:-.02em;margin-bottom:10px">Ready to Upgrade Your Wardrobe?</h2>
             <p style="font-size:15px;color:rgba(255,255,255,.6);margin-bottom:28px;max-width:440px;margin-inline:auto">Browse our full collection and find pieces that match your style.</p>
-            <a href="{{ url_for('shop') }}" class="btn btn-accent" style="font-size:15px;padding:14px 32px">Explore All Products <i class="fa-solid fa-arrow-right" style="font-size:12px"></i></a>
+            <a href="{{ url_for('front.shop') }}" class="btn btn-accent" style="font-size:15px;padding:14px 32px">Explore All Products <i class="fa-solid fa-arrow-right" style="font-size:12px"></i></a>
         </div>
     </div>
 </section>

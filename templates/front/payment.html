@@ -1,4 +1,4 @@
-{% extends "front/layout/master.html" %}
+﻿{% extends "front/layout/master.html" %}
 {% block title %}Payment — VC Shop{% endblock %}
 {% block content %}
 
@@ -86,7 +86,7 @@
                 <p style="font-size:13px;color:#bbb;margin-bottom:28px">Order #VC-{{ range(10000, 99999) | random }}</p>
                 <div style="display:flex;gap:12px">
                     <a href="/" class="btn btn-accent">Back to Home</a>
-                    <a href="{{ url_for('shop') }}" class="btn btn-outline">Continue Shopping</a>
+                    <a href="{{ url_for('front.shop') }}" class="btn btn-outline">Continue Shopping</a>
                 </div>
             </div>
         </div>

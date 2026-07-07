@@ -1,4 +1,4 @@
-{% extends "front/layout/master.html" %}
+﻿{% extends "front/layout/master.html" %}
 {% block title %}Cart — VC Shop{% endblock %}
 {% block content %}
 <div class="container page-shell">
@@ -24,8 +24,8 @@
             <div class="summary-row"><span>Subtotal</span><span>$1,613.95</span></div>
             <div class="summary-row"><span>Shipping</span><span>Free</span></div>
             <div class="summary-total"><span>Total</span><span>$1,613.95</span></div>
-            <a href="{{ url_for('payment') }}" class="btn btn-accent btn-full" style="margin-top:24px">Checkout</a>
-            <a href="{{ url_for('shop') }}" style="display:block;text-align:center;margin-top:10px;font-size:13px;color:#666">Continue Shopping</a>
+            <a href="{{ url_for('front.payment') }}" class="btn btn-accent btn-full" style="margin-top:24px">Checkout</a>
+            <a href="{{ url_for('front.shop') }}" style="display:block;text-align:center;margin-top:10px;font-size:13px;color:#666">Continue Shopping</a>
             <div style="margin-top:18px;display:flex;flex-direction:column;gap:6px;font-size:12px;color:#aaa">
                 <div>🔒 Secure 256-bit encryption</div>
                 <div>↩️ Money-back guarantee</div>

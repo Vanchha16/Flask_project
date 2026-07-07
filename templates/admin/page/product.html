@@ -1,681 +1,331 @@
+{% extends "admin/master.html" %}
+
+{% block title %}Products — VC Shop{% endblock %}
+{% block page_title %}Products{% endblock %}
+
 {% block content %}
 
-<div class="page-content" id="page-content">
-    <div class="page-header">
-        <h1>Products</h1>
-        <div class="page-actions"><button class="btn-secondary" onclick="exportTable('products')"><svg width="15"
-                    height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"></path>
-                    <polyline points="7 10 12 15 17 10"></polyline>
-                    <line x1="12" y1="15" x2="12" y2="3"></line>
-                </svg> Export</button><button class="btn-primary" onclick="openAddProduct()"><svg width="15" height="15"
-                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                    stroke-linejoin="round">
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg> Add Product</button></div>
+<!-- ══ Stat Cards ══ -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+
+  <div class="rounded-xl p-4 border" style="background:var(--card-bg);border-color:var(--border)">
+    <div class="flex items-center justify-between">
+      <div>
+        <div class="text-xs font-medium" style="color:var(--text-muted)">Total Products</div>
+        <div class="text-2xl font-bold mt-1" style="font-family:var(--heading);color:var(--text)">{{ stats.total_products if stats else 128 }}</div>
+      </div>
+      <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background:var(--accent-light)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+      </div>
     </div>
-    <div class="table-card">
-        <div class="table-toolbar">
-            <div class="prod-search-box"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                </svg><input type="text" id="prod-search" placeholder="Search..."
-                    oninput="setProdFilter('search',this.value)" value=""></div>
-            <div class="filter-panel-wrap"><button class="filter-toggle-btn" id="filter-toggle-btn"
-                    onclick="toggleFilterPanel()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="4" y1="6" x2="20" y2="6"></line>
-                        <line x1="8" y1="12" x2="16" y2="12"></line>
-                        <line x1="11" y1="18" x2="13" y2="18"></line>
-                    </svg> Filter</button>
-                <div class="filter-panel" id="filter-panel" onclick="event.stopPropagation()">
-                    <div class="filter-panel-head">
-                        <h4>Filters</h4>
-                    </div>
-                    <!-- <div class="filter-panel-section">
-                        <div class="filter-panel-label">Category</div>
-                        <div class="filter-chips"><button class="filter-chip"
-                                onclick="toggleProdFilter('cat','Men's')">Men's</button><button class="filter-chip"
-                                onclick="('cat','Women's')">Women's</button><button class="filter-chip"
-                                onclick="('cat','Jewelry')">Jewelry</button><button class="filter-chip"
-                                onclick="toggleProdFilter('cat','Electronics')">Electronics</button></div>
-                    </div> -->
-                    <div class="filter-panel-section">
-                        <div class="filter-panel-label">Price</div>
-                        <div class="filter-chips"><button class="filter-chip"
-                                onclick="toggleProdFilter('price','under30')">Under $30</button><button
-                                class="filter-chip" onclick="toggleProdFilter('price','30to100')">$30 –
-                                $100</button><button class="filter-chip"
-                                onclick="toggleProdFilter('price','over100')">Over $100</button></div>
-                    </div>
-                    <div class="filter-panel-section">
-                        <div class="filter-panel-label">Stock</div>
-                        <div class="filter-chips"><button class="filter-chip"
-                                onclick="toggleProdFilter('status','active')">In Stock</button><button
-                                class="filter-chip" onclick="toggleProdFilter('status','low')">Low Stock</button><button
-                                class="filter-chip" onclick="toggleProdFilter('status','out')">Out of Stock</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <table id="products-table">
-            <thead>
-                <tr>
-                    <th style="width:32px"><input type="checkbox" onclick="toggleAll(this)"></th>
-                    <th><span class="th-sort" onclick="setSortCol('name')">Products<span class="sort-icon"><svg
-                                    class="sort-up" width="8" height="5" viewBox="0 0 8 5">
-                                    <path d="M4 0L8 5H0z" fill="currentColor"></path>
-                                </svg><svg class="sort-dn" width="8" height="5" viewBox="0 0 8 5">
-                                    <path d="M4 5L0 0h8z" fill="currentColor"></path>
-                                </svg></span></span></th>
-                    <th><span class="th-sort" onclick="setSortCol('cat')">Category<span class="sort-icon"><svg
-                                    class="sort-up" width="8" height="5" viewBox="0 0 8 5">
-                                    <path d="M4 0L8 5H0z" fill="currentColor"></path>
-                                </svg><svg class="sort-dn" width="8" height="5" viewBox="0 0 8 5">
-                                    <path d="M4 5L0 0h8z" fill="currentColor"></path>
-                                </svg></span></span></th>
-                    <th><span class="th-sort" onclick="setSortCol('price')">Price<span class="sort-icon"><svg
-                                    class="sort-up" width="8" height="5" viewBox="0 0 8 5">
-                                    <path d="M4 0L8 5H0z" fill="currentColor"></path>
-                                </svg><svg class="sort-dn" width="8" height="5" viewBox="0 0 8 5">
-                                    <path d="M4 5L0 0h8z" fill="currentColor"></path>
-                                </svg></span></span></th>
-                    <th><span class="th-sort" onclick="setSortCol('stock')">Stock<span class="sort-icon"><svg
-                                    class="sort-up" width="8" height="5" viewBox="0 0 8 5">
-                                    <path d="M4 0L8 5H0z" fill="currentColor"></path>
-                                </svg><svg class="sort-dn" width="8" height="5" viewBox="0 0 8 5">
-                                    <path d="M4 5L0 0h8z" fill="currentColor"></path>
-                                </svg></span></span></th>
-                    <th>Status</th>
-                    <th style="width:100px">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr style="cursor:pointer" onclick="viewProduct(1)">
-                    <td onclick="event.stopPropagation()"><input type="checkbox" class="row-check" data-id="1"></td>
-                    <td>
-                        <div style="display:flex;align-items:center;gap:10px">
-                            <div
-                                style="width:36px;height:36px;border-radius:9px;background:#DBEAFE;color:#2563EB;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-                                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M16.5 9.4l-9-5.19"></path>
-                                    <path
-                                        d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 002 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z">
-                                    </path>
-                                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
-                                </svg></div>
-                            <div>
-                                <div class="fw600" style="font-size:13.5px">Canvas Backpack</div>
-                                <div class="text-muted text-sm">VC-MN-001</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td><span
-                            style="font-size:11.5px;font-weight:600;padding:2px 9px;border-radius:100px;background:#DBEAFE;color:#2563EB">Men's</span>
-                    </td>
-                    <td class="fw600">$109.95</td>
-                    <td><span class="stock-high">45</span></td>
-                    <td><span class="badge badge-active">active</span></td>
-                    <td class="actions-cell" onclick="event.stopPropagation()"><button class="btn-icon"
-                            onclick="viewProduct(1)" title="View"><svg width="15" height="15" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                <circle cx="12" cy="12" r="3"></circle>
-                            </svg></button><button class="btn-icon" onclick="openEditProduct(1)" title="Edit"><svg
-                                width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"></path>
-                                <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                            </svg></button><button class="btn-icon btn-danger" onclick="deleteProduct(1)"
-                            title="Delete"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="3 6 5 6 21 6"></polyline>
-                                <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2">
-                                </path>
-                                <line x1="10" y1="11" x2="10" y2="17"></line>
-                                <line x1="14" y1="11" x2="14" y2="17"></line>
-                            </svg></button></td>
-                </tr>
-                <tr style="cursor:pointer" onclick="viewProduct(2)">
-                    <td onclick="event.stopPropagation()"><input type="checkbox" class="row-check" data-id="2"></td>
-                    <td>
-                        <div style="display:flex;align-items:center;gap:10px">
-                            <div
-                                style="width:36px;height:36px;border-radius:9px;background:#DBEAFE;color:#2563EB;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-                                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M16.5 9.4l-9-5.19"></path>
-                                    <path
-                                        d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 002 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z">
-                                    </path>
-                                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
-                                </svg></div>
-                            <div>
-                                <div class="fw600" style="font-size:13.5px">Slim Fit Henley</div>
-                                <div class="text-muted text-sm">VC-MN-002</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td><span
-                            style="font-size:11.5px;font-weight:600;padding:2px 9px;border-radius:100px;background:#DBEAFE;color:#2563EB">Men's</span>
-                    </td>
-                    <td class="fw600">$22.30</td>
-                    <td><span class="stock-high">120</span></td>
-                    <td><span class="badge badge-active">active</span></td>
-                    <td class="actions-cell" onclick="event.stopPropagation()"><button class="btn-icon"
-                            onclick="viewProduct(2)" title="View"><svg width="15" height="15" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                <circle cx="12" cy="12" r="3"></circle>
-                            </svg></button><button class="btn-icon" onclick="openEditProduct(2)" title="Edit"><svg
-                                width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"></path>
-                                <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                            </svg></button><button class="btn-icon btn-danger" onclick="deleteProduct(2)"
-                            title="Delete"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="3 6 5 6 21 6"></polyline>
-                                <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2">
-                                </path>
-                                <line x1="10" y1="11" x2="10" y2="17"></line>
-                                <line x1="14" y1="11" x2="14" y2="17"></line>
-                            </svg></button></td>
-                </tr>
-                <tr style="cursor:pointer" onclick="viewProduct(3)">
-                    <td onclick="event.stopPropagation()"><input type="checkbox" class="row-check" data-id="3"></td>
-                    <td>
-                        <div style="display:flex;align-items:center;gap:10px">
-                            <div
-                                style="width:36px;height:36px;border-radius:9px;background:#DBEAFE;color:#2563EB;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-                                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M16.5 9.4l-9-5.19"></path>
-                                    <path
-                                        d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 002 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z">
-                                    </path>
-                                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
-                                </svg></div>
-                            <div>
-                                <div class="fw600" style="font-size:13.5px">Cotton Jacket</div>
-                                <div class="text-muted text-sm">VC-MN-003</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td><span
-                            style="font-size:11.5px;font-weight:600;padding:2px 9px;border-radius:100px;background:#DBEAFE;color:#2563EB">Men's</span>
-                    </td>
-                    <td class="fw600">$55.99</td>
-                    <td><span class="stock-high">67</span></td>
-                    <td><span class="badge badge-active">active</span></td>
-                    <td class="actions-cell" onclick="event.stopPropagation()"><button class="btn-icon"
-                            onclick="viewProduct(3)" title="View"><svg width="15" height="15" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                <circle cx="12" cy="12" r="3"></circle>
-                            </svg></button><button class="btn-icon" onclick="openEditProduct(3)" title="Edit"><svg
-                                width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"></path>
-                                <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                            </svg></button><button class="btn-icon btn-danger" onclick="deleteProduct(3)"
-                            title="Delete"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="3 6 5 6 21 6"></polyline>
-                                <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2">
-                                </path>
-                                <line x1="10" y1="11" x2="10" y2="17"></line>
-                                <line x1="14" y1="11" x2="14" y2="17"></line>
-                            </svg></button></td>
-                </tr>
-                <tr style="cursor:pointer" onclick="viewProduct(4)">
-                    <td onclick="event.stopPropagation()"><input type="checkbox" class="row-check" data-id="4"></td>
-                    <td>
-                        <div style="display:flex;align-items:center;gap:10px">
-                            <div
-                                style="width:36px;height:36px;border-radius:9px;background:#DBEAFE;color:#2563EB;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-                                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M16.5 9.4l-9-5.19"></path>
-                                    <path
-                                        d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 002 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z">
-                                    </path>
-                                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
-                                </svg></div>
-                            <div>
-                                <div class="fw600" style="font-size:13.5px">Casual Slim Shirt</div>
-                                <div class="text-muted text-sm">VC-MN-004</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td><span
-                            style="font-size:11.5px;font-weight:600;padding:2px 9px;border-radius:100px;background:#DBEAFE;color:#2563EB">Men's</span>
-                    </td>
-                    <td class="fw600">$15.99</td>
-                    <td><span class="stock-out">0</span></td>
-                    <td><span class="badge badge-cancelled">out</span></td>
-                    <td class="actions-cell" onclick="event.stopPropagation()"><button class="btn-icon"
-                            onclick="viewProduct(4)" title="View"><svg width="15" height="15" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                <circle cx="12" cy="12" r="3"></circle>
-                            </svg></button><button class="btn-icon" onclick="openEditProduct(4)" title="Edit"><svg
-                                width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"></path>
-                                <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                            </svg></button><button class="btn-icon btn-danger" onclick="deleteProduct(4)"
-                            title="Delete"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="3 6 5 6 21 6"></polyline>
-                                <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2">
-                                </path>
-                                <line x1="10" y1="11" x2="10" y2="17"></line>
-                                <line x1="14" y1="11" x2="14" y2="17"></line>
-                            </svg></button></td>
-                </tr>
-                <tr style="cursor:pointer" onclick="viewProduct(5)">
-                    <td onclick="event.stopPropagation()"><input type="checkbox" class="row-check" data-id="5"></td>
-                    <td>
-                        <div style="display:flex;align-items:center;gap:10px">
-                            <div
-                                style="width:36px;height:36px;border-radius:9px;background:#FEF9C3;color:#B8860B;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-                                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M16.5 9.4l-9-5.19"></path>
-                                    <path
-                                        d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 002 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z">
-                                    </path>
-                                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
-                                </svg></div>
-                            <div>
-                                <div class="fw600" style="font-size:13.5px">Petite Pendant</div>
-                                <div class="text-muted text-sm">VC-JW-001</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td><span
-                            style="font-size:11.5px;font-weight:600;padding:2px 9px;border-radius:100px;background:#FEF9C3;color:#B8860B">Jewelry</span>
-                    </td>
-                    <td class="fw600">$168.00</td>
-                    <td><span class="stock-high">23</span></td>
-                    <td><span class="badge badge-active">active</span></td>
-                    <td class="actions-cell" onclick="event.stopPropagation()"><button class="btn-icon"
-                            onclick="viewProduct(5)" title="View"><svg width="15" height="15" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                <circle cx="12" cy="12" r="3"></circle>
-                            </svg></button><button class="btn-icon" onclick="openEditProduct(5)" title="Edit"><svg
-                                width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"></path>
-                                <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                            </svg></button><button class="btn-icon btn-danger" onclick="deleteProduct(5)"
-                            title="Delete"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="3 6 5 6 21 6"></polyline>
-                                <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2">
-                                </path>
-                                <line x1="10" y1="11" x2="10" y2="17"></line>
-                                <line x1="14" y1="11" x2="14" y2="17"></line>
-                            </svg></button></td>
-                </tr>
-                <tr style="cursor:pointer" onclick="viewProduct(6)">
-                    <td onclick="event.stopPropagation()"><input type="checkbox" class="row-check" data-id="6"></td>
-                    <td>
-                        <div style="display:flex;align-items:center;gap:10px">
-                            <div
-                                style="width:36px;height:36px;border-radius:9px;background:#FEF9C3;color:#B8860B;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-                                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M16.5 9.4l-9-5.19"></path>
-                                    <path
-                                        d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 002 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z">
-                                    </path>
-                                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
-                                </svg></div>
-                            <div>
-                                <div class="fw600" style="font-size:13.5px">Diamond Ring</div>
-                                <div class="text-muted text-sm">VC-JW-002</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td><span
-                            style="font-size:11.5px;font-weight:600;padding:2px 9px;border-radius:100px;background:#FEF9C3;color:#B8860B">Jewelry</span>
-                    </td>
-                    <td class="fw600">$695.00</td>
-                    <td><span class="stock-low">8</span></td>
-                    <td><span class="badge badge-processing">active</span></td>
-                    <td class="actions-cell" onclick="event.stopPropagation()"><button class="btn-icon"
-                            onclick="viewProduct(6)" title="View"><svg width="15" height="15" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                <circle cx="12" cy="12" r="3"></circle>
-                            </svg></button><button class="btn-icon" onclick="openEditProduct(6)" title="Edit"><svg
-                                width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"></path>
-                                <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                            </svg></button><button class="btn-icon btn-danger" onclick="deleteProduct(6)"
-                            title="Delete"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="3 6 5 6 21 6"></polyline>
-                                <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2">
-                                </path>
-                                <line x1="10" y1="11" x2="10" y2="17"></line>
-                                <line x1="14" y1="11" x2="14" y2="17"></line>
-                            </svg></button></td>
-                </tr>
-                <tr style="cursor:pointer" onclick="viewProduct(7)">
-                    <td onclick="event.stopPropagation()"><input type="checkbox" class="row-check" data-id="7"></td>
-                    <td>
-                        <div style="display:flex;align-items:center;gap:10px">
-                            <div
-                                style="width:36px;height:36px;border-radius:9px;background:#E0F2FE;color:#0891B2;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-                                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M16.5 9.4l-9-5.19"></path>
-                                    <path
-                                        d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 002 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z">
-                                    </path>
-                                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
-                                </svg></div>
-                            <div>
-                                <div class="fw600" style="font-size:13.5px">Wireless Earbuds</div>
-                                <div class="text-muted text-sm">VC-EL-001</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td><span
-                            style="font-size:11.5px;font-weight:600;padding:2px 9px;border-radius:100px;background:#E0F2FE;color:#0891B2">Electronics</span>
-                    </td>
-                    <td class="fw600">$89.99</td>
-                    <td><span class="stock-high">200</span></td>
-                    <td><span class="badge badge-active">active</span></td>
-                    <td class="actions-cell" onclick="event.stopPropagation()"><button class="btn-icon"
-                            onclick="viewProduct(7)" title="View"><svg width="15" height="15" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                <circle cx="12" cy="12" r="3"></circle>
-                            </svg></button><button class="btn-icon" onclick="openEditProduct(7)" title="Edit"><svg
-                                width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"></path>
-                                <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                            </svg></button><button class="btn-icon btn-danger" onclick="deleteProduct(7)"
-                            title="Delete"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="3 6 5 6 21 6"></polyline>
-                                <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2">
-                                </path>
-                                <line x1="10" y1="11" x2="10" y2="17"></line>
-                                <line x1="14" y1="11" x2="14" y2="17"></line>
-                            </svg></button></td>
-                </tr>
-                <tr style="cursor:pointer" onclick="viewProduct(8)">
-                    <td onclick="event.stopPropagation()"><input type="checkbox" class="row-check" data-id="8"></td>
-                    <td>
-                        <div style="display:flex;align-items:center;gap:10px">
-                            <div
-                                style="width:36px;height:36px;border-radius:9px;background:#E0F2FE;color:#0891B2;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-                                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M16.5 9.4l-9-5.19"></path>
-                                    <path
-                                        d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 002 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z">
-                                    </path>
-                                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
-                                </svg></div>
-                            <div>
-                                <div class="fw600" style="font-size:13.5px">Smart Watch</div>
-                                <div class="text-muted text-sm">VC-EL-002</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td><span
-                            style="font-size:11.5px;font-weight:600;padding:2px 9px;border-radius:100px;background:#E0F2FE;color:#0891B2">Electronics</span>
-                    </td>
-                    <td class="fw600">$299.99</td>
-                    <td><span class="stock-high">34</span></td>
-                    <td><span class="badge badge-active">active</span></td>
-                    <td class="actions-cell" onclick="event.stopPropagation()"><button class="btn-icon"
-                            onclick="viewProduct(8)" title="View"><svg width="15" height="15" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                <circle cx="12" cy="12" r="3"></circle>
-                            </svg></button><button class="btn-icon" onclick="openEditProduct(8)" title="Edit"><svg
-                                width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"></path>
-                                <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                            </svg></button><button class="btn-icon btn-danger" onclick="deleteProduct(8)"
-                            title="Delete"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="3 6 5 6 21 6"></polyline>
-                                <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2">
-                                </path>
-                                <line x1="10" y1="11" x2="10" y2="17"></line>
-                                <line x1="14" y1="11" x2="14" y2="17"></line>
-                            </svg></button></td>
-                </tr>
-                <tr style="cursor:pointer" onclick="viewProduct(9)">
-                    <td onclick="event.stopPropagation()"><input type="checkbox" class="row-check" data-id="9"></td>
-                    <td>
-                        <div style="display:flex;align-items:center;gap:10px">
-                            <div
-                                style="width:36px;height:36px;border-radius:9px;background:#FCE7F3;color:#BE185D;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-                                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M16.5 9.4l-9-5.19"></path>
-                                    <path
-                                        d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 002 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z">
-                                    </path>
-                                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
-                                </svg></div>
-                            <div>
-                                <div class="fw600" style="font-size:13.5px">Wrap Dress</div>
-                                <div class="text-muted text-sm">VC-WM-001</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td><span
-                            style="font-size:11.5px;font-weight:600;padding:2px 9px;border-radius:100px;background:#FCE7F3;color:#BE185D">Women's</span>
-                    </td>
-                    <td class="fw600">$74.50</td>
-                    <td><span class="stock-high">56</span></td>
-                    <td><span class="badge badge-active">active</span></td>
-                    <td class="actions-cell" onclick="event.stopPropagation()"><button class="btn-icon"
-                            onclick="viewProduct(9)" title="View"><svg width="15" height="15" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                <circle cx="12" cy="12" r="3"></circle>
-                            </svg></button><button class="btn-icon" onclick="openEditProduct(9)" title="Edit"><svg
-                                width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"></path>
-                                <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                            </svg></button><button class="btn-icon btn-danger" onclick="deleteProduct(9)"
-                            title="Delete"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="3 6 5 6 21 6"></polyline>
-                                <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2">
-                                </path>
-                                <line x1="10" y1="11" x2="10" y2="17"></line>
-                                <line x1="14" y1="11" x2="14" y2="17"></line>
-                            </svg></button></td>
-                </tr>
-                <tr style="cursor:pointer" onclick="viewProduct(10)">
-                    <td onclick="event.stopPropagation()"><input type="checkbox" class="row-check" data-id="10"></td>
-                    <td>
-                        <div style="display:flex;align-items:center;gap:10px">
-                            <div
-                                style="width:36px;height:36px;border-radius:9px;background:#FCE7F3;color:#BE185D;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-                                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M16.5 9.4l-9-5.19"></path>
-                                    <path
-                                        d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 002 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z">
-                                    </path>
-                                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
-                                </svg></div>
-                            <div>
-                                <div class="fw600" style="font-size:13.5px">Knit Cardigan</div>
-                                <div class="text-muted text-sm">VC-WM-002</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td><span
-                            style="font-size:11.5px;font-weight:600;padding:2px 9px;border-radius:100px;background:#FCE7F3;color:#BE185D">Women's</span>
-                    </td>
-                    <td class="fw600">$49.99</td>
-                    <td><span class="stock-low">3</span></td>
-                    <td><span class="badge badge-processing">low</span></td>
-                    <td class="actions-cell" onclick="event.stopPropagation()"><button class="btn-icon"
-                            onclick="viewProduct(10)" title="View"><svg width="15" height="15" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                <circle cx="12" cy="12" r="3"></circle>
-                            </svg></button><button class="btn-icon" onclick="openEditProduct(10)" title="Edit"><svg
-                                width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"></path>
-                                <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                            </svg></button><button class="btn-icon btn-danger" onclick="deleteProduct(10)"
-                            title="Delete"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="3 6 5 6 21 6"></polyline>
-                                <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2">
-                                </path>
-                                <line x1="10" y1="11" x2="10" y2="17"></line>
-                                <line x1="14" y1="11" x2="14" y2="17"></line>
-                            </svg></button></td>
-                </tr>
-                <tr style="cursor:pointer" onclick="viewProduct(11)">
-                    <td onclick="event.stopPropagation()"><input type="checkbox" class="row-check" data-id="11"></td>
-                    <td>
-                        <div style="display:flex;align-items:center;gap:10px">
-                            <div
-                                style="width:36px;height:36px;border-radius:9px;background:#FCE7F3;color:#BE185D;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-                                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M16.5 9.4l-9-5.19"></path>
-                                    <path
-                                        d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 002 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z">
-                                    </path>
-                                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
-                                </svg></div>
-                            <div>
-                                <div class="fw600" style="font-size:13.5px">Leather Crossbody</div>
-                                <div class="text-muted text-sm">VC-WM-003</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td><span
-                            style="font-size:11.5px;font-weight:600;padding:2px 9px;border-radius:100px;background:#FCE7F3;color:#BE185D">Women's</span>
-                    </td>
-                    <td class="fw600">$128.00</td>
-                    <td><span class="stock-high">41</span></td>
-                    <td><span class="badge badge-active">active</span></td>
-                    <td class="actions-cell" onclick="event.stopPropagation()"><button class="btn-icon"
-                            onclick="viewProduct(11)" title="View"><svg width="15" height="15" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                <circle cx="12" cy="12" r="3"></circle>
-                            </svg></button><button class="btn-icon" onclick="openEditProduct(11)" title="Edit"><svg
-                                width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"></path>
-                                <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                            </svg></button><button class="btn-icon btn-danger" onclick="deleteProduct(11)"
-                            title="Delete"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="3 6 5 6 21 6"></polyline>
-                                <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2">
-                                </path>
-                                <line x1="10" y1="11" x2="10" y2="17"></line>
-                                <line x1="14" y1="11" x2="14" y2="17"></line>
-                            </svg></button></td>
-                </tr>
-                <tr style="cursor:pointer" onclick="viewProduct(12)">
-                    <td onclick="event.stopPropagation()"><input type="checkbox" class="row-check" data-id="12"></td>
-                    <td>
-                        <div style="display:flex;align-items:center;gap:10px">
-                            <div
-                                style="width:36px;height:36px;border-radius:9px;background:#E0F2FE;color:#0891B2;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-                                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M16.5 9.4l-9-5.19"></path>
-                                    <path
-                                        d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 002 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z">
-                                    </path>
-                                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
-                                </svg></div>
-                            <div>
-                                <div class="fw600" style="font-size:13.5px">USB-C Hub</div>
-                                <div class="text-muted text-sm">VC-EL-003</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td><span
-                            style="font-size:11.5px;font-weight:600;padding:2px 9px;border-radius:100px;background:#E0F2FE;color:#0891B2">Electronics</span>
-                    </td>
-                    <td class="fw600">$39.99</td>
-                    <td><span class="stock-high">89</span></td>
-                    <td><span class="badge badge-active">active</span></td>
-                    <td class="actions-cell" onclick="event.stopPropagation()"><button class="btn-icon"
-                            onclick="viewProduct(12)" title="View"><svg width="15" height="15" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                <circle cx="12" cy="12" r="3"></circle>
-                            </svg></button><button class="btn-icon" onclick="openEditProduct(12)" title="Edit"><svg
-                                width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"></path>
-                                <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                            </svg></button><button class="btn-icon btn-danger" onclick="deleteProduct(12)"
-                            title="Delete"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="3 6 5 6 21 6"></polyline>
-                                <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2">
-                                </path>
-                                <line x1="10" y1="11" x2="10" y2="17"></line>
-                                <line x1="14" y1="11" x2="14" y2="17"></line>
-                            </svg></button></td>
-                </tr>
-            </tbody>
-        </table>
-        <div class="table-footer"><span class="text-muted">12 of 12 products &nbsp;·&nbsp; Click any row to view
-                details</span></div>
+  </div>
+
+  <div class="rounded-xl p-4 border" style="background:var(--card-bg);border-color:var(--border)">
+    <div class="flex items-center justify-between">
+      <div>
+        <div class="text-xs font-medium" style="color:var(--text-muted)">In Stock</div>
+        <div class="text-2xl font-bold mt-1" style="font-family:var(--heading);color:var(--text)">{{ stats.in_stock if stats else 104 }}</div>
+      </div>
+      <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background:#dcfce7">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      </div>
     </div>
+  </div>
+
+  <div class="rounded-xl p-4 border" style="background:var(--card-bg);border-color:var(--border)">
+    <div class="flex items-center justify-between">
+      <div>
+        <div class="text-xs font-medium" style="color:var(--text-muted)">Low Stock</div>
+        <div class="text-2xl font-bold mt-1" style="font-family:var(--heading);color:var(--text)">{{ stats.low_stock if stats else 14 }}</div>
+      </div>
+      <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background:#fef3c7">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="rounded-xl p-4 border" style="background:var(--card-bg);border-color:var(--border)">
+    <div class="flex items-center justify-between">
+      <div>
+        <div class="text-xs font-medium" style="color:var(--text-muted)">Out of Stock</div>
+        <div class="text-2xl font-bold mt-1" style="font-family:var(--heading);color:var(--text)">{{ stats.out_of_stock if stats else 10 }}</div>
+      </div>
+      <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background:#fee2e2">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+      </div>
+    </div>
+  </div>
+
 </div>
 
+<!-- ══ Toolbar ══ -->
+<div class="rounded-xl border mb-4" style="background:var(--card-bg);border-color:var(--border)">
+  <div class="flex flex-wrap items-center justify-between gap-3 p-4">
+
+    <div class="flex flex-wrap items-center gap-2">
+      <div class="relative">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-muted);position:absolute;left:10px;top:50%;transform:translateY(-50%)"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="product-search" placeholder="Search products…"
+               class="text-sm rounded-lg pl-8 pr-3 py-2 border focus:outline-none"
+               style="background:var(--hover-bg);border-color:var(--border);color:var(--text);width:220px">
+      </div>
+
+      <select id="category-filter" class="text-sm rounded-lg px-3 py-2 border focus:outline-none"
+              style="background:var(--hover-bg);border-color:var(--border);color:var(--text)">
+        <option value="">All Categories</option>
+        <option value="apparel">Apparel</option>
+        <option value="accessories">Accessories</option>
+        <option value="figures">Figures</option>
+        <option value="electronics">Electronics</option>
+      </select>
+
+      <select id="status-filter" class="text-sm rounded-lg px-3 py-2 border focus:outline-none"
+              style="background:var(--hover-bg);border-color:var(--border);color:var(--text)">
+        <option value="">All Status</option>
+        <option value="active">Active</option>
+        <option value="low">Low Stock</option>
+        <option value="out">Out of Stock</option>
+        <option value="draft">Draft</option>
+      </select>
+    </div>
+
+    <button id="add-product-btn" onclick="openProductModal()"
+            class="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg transition-all"
+            style="background:var(--accent);color:#fff">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Add Product
+    </button>
+  </div>
+</div>
+
+<!-- ══ Products Table ══ -->
+<div class="rounded-xl border overflow-hidden" style="background:var(--card-bg);border-color:var(--border)">
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm" id="products-table">
+      <thead>
+        <tr style="border-bottom:1px solid var(--border)">
+          <th class="text-left font-semibold px-4 py-3" style="color:var(--text-muted)">
+            <input type="checkbox" id="select-all-products">
+          </th>
+          <th class="text-left font-semibold px-4 py-3" style="color:var(--text-muted)">Product</th>
+          <th class="text-left font-semibold px-4 py-3" style="color:var(--text-muted)">Category</th>
+          <th class="text-left font-semibold px-4 py-3" style="color:var(--text-muted)">Price</th>
+          <th class="text-left font-semibold px-4 py-3" style="color:var(--text-muted)">Stock</th>
+          <th class="text-left font-semibold px-4 py-3" style="color:var(--text-muted)">Status</th>
+          <th class="text-right font-semibold px-4 py-3" style="color:var(--text-muted)">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for product in products %}
+        <tr class="product-row" style="border-bottom:1px solid var(--border)"
+            data-category="{{ product.category | lower }}" data-status="{{ product.status | lower }}">
+          <td class="px-4 py-3">
+            <input type="checkbox" class="row-select" value="{{ product.id }}">
+          </td>
+          <td class="px-4 py-3">
+            <div class="flex items-center gap-3">
+              <img src="{{ product.image_url or url_for('static', filename='img/placeholder.png') }}"
+                   alt="{{ product.name }}" class="w-10 h-10 rounded-lg object-cover flex-shrink-0" style="border:1px solid var(--border)">
+              <div>
+                <div class="font-semibold" style="color:var(--text)">{{ product.name }}</div>
+                <div class="text-xs" style="color:var(--text-muted)">SKU: {{ product.sku }}</div>
+              </div>
+            </div>
+          </td>
+          <td class="px-4 py-3" style="color:var(--text)">{{ product.category }}</td>
+          <td class="px-4 py-3 font-medium" style="color:var(--text)">${{ "%.2f"|format(product.price) }}</td>
+          <td class="px-4 py-3" style="color:var(--text)">{{ product.stock }}</td>
+          <td class="px-4 py-3">
+            {% if product.status == 'active' %}
+              <span class="text-xs font-semibold px-2 py-1 rounded-full" style="background:#dcfce7;color:#16a34a">Active</span>
+            {% elif product.status == 'low' %}
+              <span class="text-xs font-semibold px-2 py-1 rounded-full" style="background:#fef3c7;color:#d97706">Low Stock</span>
+            {% elif product.status == 'out' %}
+              <span class="text-xs font-semibold px-2 py-1 rounded-full" style="background:#fee2e2;color:#dc2626">Out of Stock</span>
+            {% else %}
+              <span class="text-xs font-semibold px-2 py-1 rounded-full" style="background:var(--hover-bg);color:var(--text-muted)">Draft</span>
+            {% endif %}
+          </td>
+          <td class="px-4 py-3">
+            <div class="flex items-center justify-end gap-1">
+              <button title="View" class="p-1.5 rounded-lg" style="color:var(--text-muted)" onmouseenter="this.style.background='var(--hover-bg)'" onmouseleave="this.style.background='transparent'" onclick="viewProduct({{ product.id }})">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+              <button title="Edit" class="p-1.5 rounded-lg" style="color:var(--text-muted)" onmouseenter="this.style.background='var(--hover-bg)'" onmouseleave="this.style.background='transparent'" onclick="openProductModal({{ product.id }})">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4z"/></svg>
+              </button>
+              <button title="Delete" class="p-1.5 rounded-lg" style="color:#dc2626" onmouseenter="this.style.background='#fee2e2'" onmouseleave="this.style.background='transparent'" onclick="deleteProduct({{ product.id }})">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a2 2 0 012-2h2a2 2 0 012 2v2"/></svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="7" class="px-4 py-10 text-center" style="color:var(--text-muted)">
+            No products yet. Click <strong>Add Product</strong> to create your first listing.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="flex items-center justify-between px-4 py-3" style="border-top:1px solid var(--border)">
+    <span class="text-xs" style="color:var(--text-muted)">
+      Showing {{ products|length }} of {{ stats.total_products if stats else (products|length) }} products
+    </span>
+    <div class="flex items-center gap-1">
+      <button class="text-xs px-3 py-1.5 rounded-lg border" style="border-color:var(--border);color:var(--text-muted)">Previous</button>
+      <button class="text-xs px-3 py-1.5 rounded-lg" style="background:var(--accent);color:#fff">1</button>
+      <button class="text-xs px-3 py-1.5 rounded-lg border" style="border-color:var(--border);color:var(--text-muted)">2</button>
+      <button class="text-xs px-3 py-1.5 rounded-lg border" style="border-color:var(--border);color:var(--text-muted)">Next</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Add / Edit Product Form (rendered into #modal-body) ══ -->
+<template id="product-form-template">
+  <form id="product-form" class="space-y-4">
+    <input type="hidden" name="product_id" id="product-id">
+
+    <div>
+      <label class="text-xs font-semibold" style="color:var(--text-muted)">Product Name</label>
+      <input type="text" name="name" required class="w-full mt-1 text-sm rounded-lg px-3 py-2 border focus:outline-none"
+             style="background:var(--hover-bg);border-color:var(--border);color:var(--text)" placeholder="e.g. Naruto Uzumaki Figure">
+    </div>
+
+    <div class="grid grid-cols-2 gap-3">
+      <div>
+        <label class="text-xs font-semibold" style="color:var(--text-muted)">Category</label>
+        <select name="category" class="w-full mt-1 text-sm rounded-lg px-3 py-2 border focus:outline-none"
+                style="background:var(--hover-bg);border-color:var(--border);color:var(--text)">
+          <option value="apparel">Apparel</option>
+          <option value="accessories">Accessories</option>
+          <option value="figures">Figures</option>
+          <option value="electronics">Electronics</option>
+        </select>
+      </div>
+      <div>
+        <label class="text-xs font-semibold" style="color:var(--text-muted)">SKU</label>
+        <input type="text" name="sku" class="w-full mt-1 text-sm rounded-lg px-3 py-2 border focus:outline-none"
+               style="background:var(--hover-bg);border-color:var(--border);color:var(--text)" placeholder="VC-00123">
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3">
+      <div>
+        <label class="text-xs font-semibold" style="color:var(--text-muted)">Price ($)</label>
+        <input type="number" step="0.01" name="price" required class="w-full mt-1 text-sm rounded-lg px-3 py-2 border focus:outline-none"
+               style="background:var(--hover-bg);border-color:var(--border);color:var(--text)" placeholder="0.00">
+      </div>
+      <div>
+        <label class="text-xs font-semibold" style="color:var(--text-muted)">Stock Quantity</label>
+        <input type="number" name="stock" required class="w-full mt-1 text-sm rounded-lg px-3 py-2 border focus:outline-none"
+               style="background:var(--hover-bg);border-color:var(--border);color:var(--text)" placeholder="0">
+      </div>
+    </div>
+
+    <div>
+      <label class="text-xs font-semibold" style="color:var(--text-muted)">Description</label>
+      <textarea name="description" rows="3" class="w-full mt-1 text-sm rounded-lg px-3 py-2 border focus:outline-none resize-none"
+                style="background:var(--hover-bg);border-color:var(--border);color:var(--text)" placeholder="Short product description…"></textarea>
+    </div>
+
+    <div>
+      <label class="text-xs font-semibold" style="color:var(--text-muted)">Product Image</label>
+      <input type="file" name="image" accept="image/*" class="w-full mt-1 text-sm rounded-lg px-3 py-2 border focus:outline-none"
+             style="background:var(--hover-bg);border-color:var(--border);color:var(--text)">
+    </div>
+
+    <div class="flex items-center justify-end gap-2 pt-2">
+      <button type="button" class="text-sm font-medium px-4 py-2 rounded-lg" style="color:var(--text-muted)" onclick="closeModal()">Cancel</button>
+      <button type="submit" class="text-sm font-semibold px-4 py-2 rounded-lg" style="background:var(--accent);color:#fff">Save Product</button>
+    </div>
+  </form>
+</template>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  function openProductModal(productId) {
+    const isEdit = !!productId;
+    document.getElementById('modal-title').textContent = isEdit ? 'Edit Product' : 'Add Product';
+    const template = document.getElementById('product-form-template');
+    const body = document.getElementById('modal-body');
+    body.innerHTML = '';
+    body.appendChild(template.content.cloneNode(true));
+
+    if (isEdit) {
+      document.getElementById('product-id').value = productId;
+      // TODO: fetch product data and populate the form fields, e.g.
+      // fetch(`/admin/products/${productId}.json`).then(r => r.json()).then(populateProductForm);
+    }
+
+    document.getElementById('product-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      const url = isEdit ? `/admin/products/${productId}` : '/admin/products';
+      fetch(url, { method: isEdit ? 'PUT' : 'POST', body: formData })
+        .then(res => res.json())
+        .then(data => {
+          showToast(data.message || (isEdit ? 'Product updated' : 'Product added'), 'success');
+          closeModal();
+          location.reload();
+        })
+        .catch(() => showToast('Something went wrong. Please try again.', 'error'));
+    });
+
+    document.getElementById('modal-overlay').classList.add('active');
+  }
+
+  function viewProduct(productId) {
+    window.location.href = `/admin/products/${productId}`;
+  }
+
+  function deleteProduct(productId) {
+    if (!confirm('Delete this product? This cannot be undone.')) return;
+    fetch(`/admin/products/${productId}`, { method: 'DELETE' })
+      .then(res => res.json())
+      .then(data => {
+        showToast(data.message || 'Product deleted', 'success');
+        location.reload();
+      })
+      .catch(() => showToast('Could not delete product.', 'error'));
+  }
+
+  function closeModal() {
+    document.getElementById('modal-overlay').classList.remove('active');
+  }
+
+  // Search + filters
+  document.addEventListener('DOMContentLoaded', function () {
+    const searchInput = document.getElementById('product-search');
+    const categoryFilter = document.getElementById('category-filter');
+    const statusFilter = document.getElementById('status-filter');
+    const rows = document.querySelectorAll('.product-row');
+
+    function applyFilters() {
+      const term = searchInput.value.toLowerCase();
+      const cat = categoryFilter.value.toLowerCase();
+      const status = statusFilter.value.toLowerCase();
+
+      rows.forEach(row => {
+        const name = row.querySelector('.font-semibold').textContent.toLowerCase();
+        const matchesSearch = name.includes(term);
+        const matchesCategory = !cat || row.dataset.category === cat;
+        const matchesStatus = !status || row.dataset.status === status;
+        row.style.display = (matchesSearch && matchesCategory && matchesStatus) ? '' : 'none';
+      });
+    }
+
+    searchInput.addEventListener('input', applyFilters);
+    categoryFilter.addEventListener('change', applyFilters);
+    statusFilter.addEventListener('change', applyFilters);
+
+    document.getElementById('select-all-products').addEventListener('change', function () {
+      document.querySelectorAll('.row-select').forEach(cb => cb.checked = this.checked);
+    });
+  });
+</script>
 {% endblock %}
